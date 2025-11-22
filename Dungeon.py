@@ -1,12 +1,26 @@
+import pygame
 import random
 import Field
 import Interface
 
 
-def first_floor() -> bool:
+def first_floor():
+    pygame.init()
+    width, height = 1280, 720
+    screen = pygame.display.set_mode((width,height))
+    pygame.display.set_caption("던전 1층")
+    clock = pygame.time.Clock()
     turn = 0
 
-    while True:
+    run = True
+    while run:
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+
+
         turn += 1
         Field.start_turn()
 
@@ -95,3 +109,7 @@ def first_floor() -> bool:
         if not Field.allies_alive():
             print("던전 1층 실패!")
             return False
+        
+        screen.fill((20,20,20)) # 임시 배경
+        pygame.display.flip()
+        clock.tick(60)
