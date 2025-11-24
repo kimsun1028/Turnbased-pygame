@@ -11,6 +11,7 @@ class Knight(Character):
             skill_cost=1,
             skill_name="도발(1)",
         )
+        self.set_animator("Knight-Idle.png", scale=2.0, fps=8)
 
     def take_damage(self, damage: int):
         time.sleep(0.4)

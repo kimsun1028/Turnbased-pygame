@@ -1,5 +1,6 @@
 import time
 import Field
+import Animation
 
 
 class Character:
@@ -10,6 +11,9 @@ class Character:
         self.skill_cost = skill_cost
         self.job = job
         self.skill_name = skill_name
+        self.animator = None
+        self.position = (0,0)
+
 
     @property
     def is_alive(self) -> bool:
@@ -67,3 +71,10 @@ class Character:
 
     def can_use_skill(self) -> bool:
         return Field.skill_point >= self.skill_cost
+
+
+    def set_animator(self, file_path, scale=2.0, fps=12):
+        self.animator = Animation.SpriteAnimator(file_path, scale, fps)
+
+    def set_position(self,x,y):
+        self.position = (x,y)
