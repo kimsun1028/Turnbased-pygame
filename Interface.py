@@ -11,9 +11,6 @@ def auto_layout(positions_x, start_y, gap, objects):
 
 
 def show_status(screen, character, offset_x=25, offset_y=120):
-    """
-    character.position 기준으로 offset만큼 위로 텍스트 출력
-    """
     font = pygame.font.SysFont("malgungothic", 12)
 
     x, y = character.position
@@ -28,6 +25,7 @@ def show_status(screen, character, offset_x=25, offset_y=120):
 def draw_top_hud(screen):
     font = pygame.font.SysFont("malgungothic", 18)
 
+    turn_text =  f"턴 : {Field.turn}"
     # 도발 턴
     taunt_text = f"도발 남은 턴: {Field.remain_taunt_turn}"
 
@@ -38,9 +36,10 @@ def draw_top_hud(screen):
     if Field.is_taunt():
         taunt_surface = font.render(taunt_text, True, (255, 255, 255))
         screen.blit(taunt_surface, (50, 60))
-    
+    turn_surface = font.render(turn_text, True, (255,255,255))
     sp_surface = font.render(sp_text, True, (255, 255, 255))
-    screen.blit(sp_surface, (50, 20))
+    screen.blit(sp_surface, (50, 40))
+    screen.blit(turn_surface, (50, 20))
 
 
 

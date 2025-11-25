@@ -2,6 +2,7 @@ remain_taunt_turn = 0
 skill_point = 2
 max_skill_point = 4
 party_len = 3
+turn = 1
 
 # allies: 플레이어 캐릭터 객체 리스트
 # enemies: 적 객체 리스트
