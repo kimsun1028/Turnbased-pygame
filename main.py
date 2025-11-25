@@ -22,27 +22,13 @@ def main():
 
     party_scene = PartySelect(screen)
     party_scene.run()
-    Animation.anim_play("Armored Axeman-Attack03.png", screen, (0,0), loop_count=1)
-
-    # 지속 애니메이션 생성
-    idle_anim = Animation.SpriteAnimator("Armored Axeman-Idle.png", scale=2.0, fps=12)
 
     # 지속 루프 (메인 루프)
     running = True
     clock = pygame.time.Clock()
 
-    while running:
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                running = False
-
-        idle_anim.update()
-
-        screen.fill((20,20,20))
-        idle_anim.draw(screen, (0,0))
-        
-        pygame.display.flip()
-        clock.tick(60)
+    
+    Dungeon.first_floor(screen)
 
     pygame.quit()
     

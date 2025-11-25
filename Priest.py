@@ -11,7 +11,9 @@ class Priest(Character):
             skill_cost=1,
             skill_name="힐/딜(1)",
         )
-
+        self.set_animator("animation/Priest/Priest-Idle.png")
+        self.set_position(100,100)
+        
     def skill(self):
         Field.skill_point -= 1
         print("스킬유형을 선택하세요  힐(1) / 딜(2)")

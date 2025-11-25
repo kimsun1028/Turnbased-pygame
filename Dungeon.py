@@ -4,11 +4,7 @@ import Field
 import Interface
 
 
-def first_floor():
-    pygame.init()
-    width, height = 1280, 720
-    screen = pygame.display.set_mode((width,height))
-    pygame.display.set_caption("던전 1층")
+def first_floor(screen):
     clock = pygame.time.Clock()
     turn = 0
 
@@ -19,6 +15,16 @@ def first_floor():
             if event.type == pygame.QUIT:
                 run = False
 
+
+        screen.fill((30,30,30))
+
+        for ally in Field.allies:
+            if ally.animator:
+                ally.animator.update()
+                ally.animator.draw(screen, ally.position)
+        
+        pygame.display.flip()
+        clock.tick(60)
 
 
         turn += 1
