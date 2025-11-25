@@ -8,6 +8,8 @@ class Slime(Enemy):
     def __init__(self, name: str):
         super().__init__(name=name, hp=150, power=35)
         self.job = "슬라임"
+        self.set_animator("animation/Slime/Slime-Idle.png")
+        self.set_position(0,0)
 
     def basic_attack(self):
         target = self.select_target()

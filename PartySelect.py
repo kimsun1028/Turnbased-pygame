@@ -12,7 +12,7 @@ class PartySelect:
         self.jobs = [
             ("나이트", Knight),
             ("아처", Archer),
-            ("프리스트", Priest)   
+            ("프리스트", Priest)
         ]
 
         self.selected = []
@@ -26,12 +26,24 @@ class PartySelect:
                     running = False
 
                 if event.type == pygame.KEYDOWN:
+                    new_char = None
+
                     if event.key == pygame.K_1:
-                        self.selected.append(Knight())
+                        new_char = Knight()
+
                     elif event.key == pygame.K_2:
-                        self.selected.append(Archer())
+                        new_char = Archer()
+
                     elif event.key == pygame.K_3:
-                        self.selected.append(Priest())
+                        new_char = Priest()
+
+                    # 중복 체크
+                    if new_char:
+                        # 이미 같은 직업이 파티에 있으면 추가 금지
+                        if any(type(c) is type(new_char) for c in self.selected):
+                            print("이미 해당 직업이 파티에 있습니다!")
+                        else:
+                            self.selected.append(new_char)
 
                     # 파티 인원 채워졌으면 종료
                     if len(self.selected) == Field.party_len:
@@ -47,13 +59,13 @@ class PartySelect:
             self.draw_text("1. 나이트", 100, 200)
             self.draw_text("2. 아처", 100, 300)
             self.draw_text("3. 프리스트", 100, 400)
-            
+
             # 선택된 캐릭터 표시
             for i, char in enumerate(self.selected):
                 self.draw_text(f"{i+1}. {char.job}", 800, 200 + i * 100)
 
-            pygame.display.flip()   # ★ 화면 업데이트
-    
+            pygame.display.flip()
+
     def draw_text(self, message, x, y):
         text_surface = self.font.render(message, True, (255, 255, 255))
         self.screen.blit(text_surface, (x, y))

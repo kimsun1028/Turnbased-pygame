@@ -27,7 +27,7 @@ def main():
     running = True
     clock = pygame.time.Clock()
 
-    
+    setup_first_floor()
     Dungeon.first_floor(screen)
 
     pygame.quit()

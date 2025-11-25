@@ -6,27 +6,42 @@ import Interface
 
 def first_floor(screen):
     clock = pygame.time.Clock()
-    turn = 0
-
     run = True
+
+    enemy_positions = [(900, 150), (1000, 300), (900, 450)]
+    for enemy,pos in zip(Field.enemies, enemy_positions):
+        enemy.set_position(pos[0], pos[1])
+    
     while run:
-        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-
+        
 
         screen.fill((30,30,30))
+
+        Interface.draw_top_hud(screen)
+        alive_allies = Field.allies_alive()
+        alive_enemies = Field.enemies_alive()
+
+        Interface.auto_layout(positions_x=200, start_y=150, gap=150, objects=alive_allies)
+        Interface.auto_layout(positions_x=900, start_y=150, gap=150, objects=alive_enemies)
 
         for ally in Field.allies:
             if ally.animator:
                 ally.animator.update()
                 ally.animator.draw(screen, ally.position)
+                Interface.show_status(screen, ally)
         
+        for enemy in Field.enemies:
+            enemy.animator.update()
+            enemy.animator.draw(screen, enemy.position)
+            Interface.show_status(screen, enemy)
+
         pygame.display.flip()
         clock.tick(60)
 
-
+        """
         turn += 1
         Field.start_turn()
 
@@ -115,7 +130,4 @@ def first_floor(screen):
         if not Field.allies_alive():
             print("던전 1층 실패!")
             return False
-        
-        screen.fill((20,20,20)) # 임시 배경
-        pygame.display.flip()
-        clock.tick(60)
+        """

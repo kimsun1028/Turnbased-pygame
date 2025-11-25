@@ -73,7 +73,7 @@ class Character:
         return Field.skill_point >= self.skill_cost
 
 
-    def set_animator(self, file_path, scale=2.0, fps=12):
+    def set_animator(self, file_path, scale=2.0, fps=8):
         self.animator = Animation.SpriteAnimator(file_path, scale, fps)
 
     def set_position(self,x,y):

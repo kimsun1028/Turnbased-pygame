@@ -1,7 +1,7 @@
 import pygame
 from pygame import Rect
 class SpriteAnimator:
-    def __init__(self, file_path, scale=2.0, fps=12):
+    def __init__(self, file_path, scale=2.0, fps=8):
         self.sheet = pygame.image.load(file_path).convert_alpha()
         self.sheet_width, self.sheet_height = self.sheet.get_size()
 
@@ -14,6 +14,7 @@ class SpriteAnimator:
         self.current = 0
         self.counter = 0
 
+        # 프레임 자르기
         for i in range(self.frame_num):
             frame = self.sheet.subsurface(
                 Rect(i * self.FRAME_SIZE, 0, self.FRAME_SIZE, self.FRAME_SIZE)
@@ -25,6 +26,7 @@ class SpriteAnimator:
             self.frames.append(frame)
 
     def update(self):
+        # frame update frequency
         self.counter += 1
         if self.counter >= (60 // self.fps):
             self.counter = 0
