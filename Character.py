@@ -22,6 +22,10 @@ class Character:
         self.current_anim = None    # 재생중인 애니메이션 정보
         self.anim_timer = None  # 일정 시간 후 idle로 복귀
 
+        # 매우중요!!!! 애니메이션 큐
+        self.anim_queue = []
+        self.queue_time = 0.0   # 현재 큐 내 항목 경과 시간
+
     # 생존 정보
     @property
     def is_alive(self) -> bool:
@@ -49,19 +53,39 @@ class Character:
         self.current_anim = state
         self.anim_timer = duration
 
-    # 애니메이션 업데이트 메서드
-    def  update_anim(self, dt):
-        if self.current_anim is None:
+    def queue_push(self, state, duration=None):
+        self.anim_queue.append((state, duration))
+
+    def queue_clear(self):
+        self.anim_queue.clear()
+
+    def queue_update(self, dt):
+        if not self.anim_queue:
+            if "Idle" in self.animations and self.current_anim != "Idle" and self.is_alive:
+                self.play_anim("Idle")
             return
         
-        self.animations[self.current_anim].update()
+        state, duration = self.anim_queue[0]
 
-        if self.anim_timer is not None:
-            self.anim_timer -= dt
-            if self.anim_timer <= 0:
-                self.anim_timer = None
-                if self.is_alive and "Idle" in self.animations:
-                    self.current_anim = "Idle"
+        if self.current_anim != state:
+            self.play_anim(state, duration)
+            self.queue_time = 0.0
+
+        self.queue_time += dt
+
+        if duration is not None:
+            if self.queue_time >= duration:
+                self.anim_queue.pop(0)
+                return
+
+        anim = self.animations[state]
+        if duration is None and anim.finished:
+            self.anim_queue.pop(0)    
+
+    # 애니메이션 업데이트 메서드
+    def update(self, dt):
+        self.queue_update(dt)
+        self.animations[self.current_anim].update(dt)
 
     # 화면 출력 메서드
     def draw(self,screen):
