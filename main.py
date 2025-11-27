@@ -89,7 +89,7 @@ def animation_test_loop(screen):
                     test_char.queue_clear()
                     test_char.move_to((x+200,y+100))
                     test_char.queue_push("TauntBasic",None)
-                    test_char.move_to((x-200,y-100))
+                    test_char.move_to((x,y))
                 elif event.key == pygame.K_RETURN:
                     # Enter → 테스트 종료
                     return
