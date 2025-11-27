@@ -20,7 +20,6 @@ class Character:
         # 애니메이터 정보
         self.animations = {}    # 애니매이션 정보 저장 set
         self.current_anim = None    # 재생중인 애니메이션 정보
-        self.anim_timer = None  # 일정 시간 후 idle로 복귀
 
         # 매우중요!!!! 애니메이션 큐
         self.anim_queue = []
@@ -33,25 +32,13 @@ class Character:
 
     # 애니메이션 추가 메서드
     def add_anim(self, state, scale = 2.0, fps = 8, loop = True):
-        # state : 애니메이션 이름이자 파일 이름
         path = f"animation/{self.job_eng}/{self.job_eng}-{state}.png"
 
-        animator = Animation.SpriteAnimator(path,scale,fps,loop)
-        self.animations[state] = animator
+        self.animations[state] = Animation.SpriteAnimator(path,scale,fps,loop)
 
         if self.current_anim is None:
             self.current_anim = state 
 
-    # 애니메이션 재생 메서드
-    def play_anim(self, state, duration = None):
-        if state not in self.animations:
-            return
-
-        anime = self.animations[state]
-        anime.reset()
-
-        self.current_anim = state
-        self.anim_timer = duration
 
     def queue_push(self, state, duration=None):
         self.anim_queue.append((state, duration))
@@ -68,7 +55,9 @@ class Character:
         state, duration = self.anim_queue[0]
 
         if self.current_anim != state:
-            self.play_anim(state, duration)
+            anim = self.animatons[state]
+            anim.reset()
+            self.current_anim = state
             self.queue_time = 0.0
 
         self.queue_time += dt
@@ -89,14 +78,14 @@ class Character:
 
     # 화면 출력 메서드
     def draw(self,screen):
-        if self.current_anim:
-            animator = self.animations[self.current_anim]
-            animator.draw(screen, self.position)
+        self.animations[self.current_anim].draw(screen, self.position)
 
     # 위치 설정 메서드
     def set_position(self,x,y):
         self.position = (x,y)
     
+
+
     # 기본공격 메서드 (특정 class 오버라이드)
     def basic_attack(self):
         print("대상을 입력하세요 : ")
@@ -126,38 +115,29 @@ class Character:
         raise NotImplementedError
 
     # 데미지를 입는 메서드
-    def take_damage(self, damage: int):
+    def take_damage(self, damage):
         self.current_hp -= damage
 
         if self.current_hp <= 0:
             self.current_hp = 0
             print(f"{self.job}이(가) {damage}의 피해를 입고 사망했습니다.")
-            self.play_anim("Death")
+            self.queue_pusth("Death", None)
         else:
             print(
                 f"{self.job}이(가) {damage}의 피해를 입었습니다. "
                 f"(HP : {self.current_hp}/{self.max_hp})"
             )
-            self.play_anim("Hurt", duration=0.3)
+            self.queue_push("Hurt", 0.3)
 
-    def heal(self, amount: int):
-        time.sleep(1.0)
-
-        if self.current_hp + amount >= self.max_hp:
-            heal_amount = self.max_hp - self.current_hp
-        else:
-            heal_amount = amount
-
+    def heal(self, amount):
+        heal_amount = min(amount, self.max_hp - self.current_hp)
         self.current_hp += heal_amount
         print(
             f"{self.job}이(가) {heal_amount}만큼 체력을 회복했습니다! "
             f"(HP : {self.current_hp}/{self.max_hp})"
         )
+        self.queue_push("Heal",0.5)
 
     def can_use_skill(self) -> bool:
         return Field.skill_point >= self.skill_cost
-
-
-    def set_animator(self, file_path, scale=2.0, fps=8):
-        self.animator = Animation.SpriteAnimator(file_path, scale, fps)
 
