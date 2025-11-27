@@ -1,4 +1,3 @@
-import time
 import Field
 import Animation
 
@@ -48,14 +47,19 @@ class Character:
 
     def queue_update(self, dt):
         if not self.anim_queue:
-            if "Idle" in self.animations and self.current_anim != "Idle" and self.is_alive:
-                self.play_anim("Idle")
+            if ("Idle" in self.animations 
+                and self.current_anim != "Idle" 
+                and self.is_alive):
+
+                anim = self.animations["Idle"]
+                anim.reset()
+                self.current_anim = "Idle"
             return
         
         state, duration = self.anim_queue[0]
 
         if self.current_anim != state:
-            anim = self.animatons[state]
+            anim = self.animations[state]
             anim.reset()
             self.current_anim = state
             self.queue_time = 0.0
@@ -74,11 +78,13 @@ class Character:
     # 애니메이션 업데이트 메서드
     def update(self, dt):
         self.queue_update(dt)
-        self.animations[self.current_anim].update(dt)
+        if self.current_anim:
+            self.animations[self.current_anim].update(dt)
 
     # 화면 출력 메서드
     def draw(self,screen):
-        self.animations[self.current_anim].draw(screen, self.position)
+        if self.current_anim:
+            self.animations[self.current_anim].draw(screen, self.position)
 
     # 위치 설정 메서드
     def set_position(self,x,y):
@@ -87,6 +93,7 @@ class Character:
 
 
     # 기본공격 메서드 (특정 class 오버라이드)
+    """
     def basic_attack(self):
         print("대상을 입력하세요 : ")
         enemy_index = int(input()) - 1
@@ -98,7 +105,8 @@ class Character:
             return
 
         # 기본공격 애니메이션 재생
-        self.play_anim("Basic", duration=0.4)
+        self.queue_clear()
+        self.queue_push("Basic", None)
 
         # 적에게 데미지 입히기
         target = enemies_alive[enemy_index]
@@ -108,7 +116,7 @@ class Character:
         Field.skill_point += 1
         if Field.skill_point > Field.max_skill_point:
             Field.skill_point = Field.max_skill_point
-
+    """
     # 스킬 메서드
     # 자식 클래스에서 반드시 오버라이드!!!!
     def skill(self):        
@@ -121,7 +129,7 @@ class Character:
         if self.current_hp <= 0:
             self.current_hp = 0
             print(f"{self.job}이(가) {damage}의 피해를 입고 사망했습니다.")
-            self.queue_pusth("Death", None)
+            self.queue_push("Death", None)
         else:
             print(
                 f"{self.job}이(가) {damage}의 피해를 입었습니다. "
