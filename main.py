@@ -60,6 +60,7 @@ def animation_test_loop(screen):
                 elif event.key == pygame.K_4:
                     # Skill 모션
                     test_char.queue_clear()
+                    Field.remain_taunt_turn = 2
                     test_char.queue_push("Skill", None)
 
                 elif event.key == pygame.K_5:
@@ -72,6 +73,9 @@ def animation_test_loop(screen):
                     test_char.queue_clear()
                     test_char.queue_push("Death", None)
 
+                elif event.key == pygame.K_7 :
+                    test_enemy = Field.enemies.pop()
+
                 
 
                 elif event.key == pygame.K_SPACE:
@@ -81,6 +85,8 @@ def animation_test_loop(screen):
                 elif event.key == pygame.K_e:
                     test_char.basic_attack(test_enemy)
                     # Enter → 테스트 종료
+
+                elif event.key == pygame.K_RETURN:
                     return
 
         # 업데이트

@@ -131,26 +131,34 @@ class Character:
         # 일반 애니메이션 처리
         # =====================================================
         state, duration = self.anim_queue[0]
+        anim = self.animations[state]
 
+        # 애니메이션 상태 변경
         if self.current_anim != state:
-            anim = self.animations[state]
             anim.reset()
             self.current_anim = state
             self.queue_time = 0.0
 
-        # 시간 경과
+        # duration 적용
+        if duration is not None:
+            anim.duration = duration
+        else:
+            anim.duration = 0.5
+
+        anim.time_per_frame = anim.duration / anim.total_frames
+
+        # time 증가
         self.queue_time += dt
 
-        # duration이 있는 경우
-        if duration is not None:
-            if self.queue_time >= duration:
-                self.anim_queue.pop(0)
-                return
-        else:
-            # duration이 None이면 애니 끝나는 순간 pop
-            anim = self.animations[state]
+        # duration이 None이면: animator가 finished 되면 pop
+        if duration is None:
             if anim.finished:
                 self.anim_queue.pop(0)
+        else:
+            # duration이 있을 때: queue_time이 duration을 넘으면 pop
+            if self.queue_time >= duration:
+                self.anim_queue.pop(0)
+
 
     # ---------------------------------------------------------
     # update
@@ -201,15 +209,16 @@ class Character:
             "target": target,
             "damage": damage,
         })
-
     def hit_on_frame(self, anim_name, frame_index, target, damage):
-        """
-        anim_name 애니메이션의 frame_index 프레임 시점에 타격이 일어나도록 예약한다.
-        (SpriteAnimator.time_per_frame 사용)
-        """
         anim = self.animations[anim_name]
-        delay = frame_index * anim.time_per_frame  # frame_index * (1/fps)
+
+        # duration 기반
+        total = anim.duration
+        N = anim.total_frames
+        delay = total * (frame_index / N)
+
         self.hit_in(delay, target, damage)
+
 
 
     # ---------------------------------------------------------
@@ -262,7 +271,7 @@ class Character:
         # 1) 이동 (근접)
         if move_in:
             tx, ty = target.position
-            attack_x = tx - 120   # 적의 왼쪽 120px 지점
+            attack_x = tx - 100   # 적의 왼쪽 100px 지점
             attack_y = ty
             self.move_to((attack_x, attack_y), duration=0.25)
 

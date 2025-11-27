@@ -16,8 +16,8 @@ class Archer(Character):
             skill_name="난사(2)",
         )
 
+    """
     def basic_attack(self):
-        """적 두 명에게 공격력 75%의 피해를 주는 기본 공격"""
         damage = int(self.power * 0.75)
 
         enemies_alive = Field.enemies_alive()
@@ -63,7 +63,17 @@ class Archer(Character):
 
         target1.take_damage(damage)
         target2.take_damage(damage)
+    """
 
+    def basic_attack(self, target):
+        super().basic_attack(
+        target=target,
+        anim="Basic",
+        hit_frame=9,
+        damage=self.power,
+        move_in=False,
+        move_back=False
+        )
     def skill(self):
         """아처 스킬: 난사 → 랜덤 적에게 공격력 40% 피해를 10번 분배"""
         Field.skill_point -= 2

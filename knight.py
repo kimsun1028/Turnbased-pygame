@@ -46,16 +46,17 @@ class Knight(Character):
             super().basic_attack(
             target=target,
             anim="TauntBasic",
-            hit_frame=5,
+            hit_frame=9,
             damage=damage,
             move_in=True,
             move_back=True
         )
-        super().basic_attack(
-            target=target,
-            anim="Basic",
-            hit_frame=5,
-            damage=self.power,
-            move_in=True,
-            move_back=True
-        )
+        else:
+            super().basic_attack(
+                target=target,
+                anim="Basic",
+                hit_frame=5,
+                damage=self.power,
+                move_in=True,
+                move_back=True
+            )
