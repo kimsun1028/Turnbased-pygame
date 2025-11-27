@@ -7,6 +7,8 @@ class SpriteAnimator:
 
         self.FRAME_SIZE = 100
         self.scale = scale
+        sheet_width = self.sheet.get_size()[0]
+        self.frame_num = sheet_width // self.FRAME_SIZE
 
         self.frames = []
         self._load_frames()

@@ -28,8 +28,12 @@ def animation_test_loop(screen):
     # 첫 번째 아군만 테스트 대상으로 사용
     test_char = Field.allies[0]
     test_enemy = Field.enemies[0]
+    test_enemy1 = Field.enemies[1]
+    test_enemy2 = Field.enemies[2]
     test_char.set_position(400, 300)
     test_enemy.set_position(660,300)
+    test_enemy1.set_position(660,200)
+    test_enemy2.set_position(660,400)
     # 화면 안내용 폰트
     font = pygame.font.SysFont("malgungothic", 28)
 
@@ -92,6 +96,8 @@ def animation_test_loop(screen):
         # 업데이트
         test_char.update(dt)
         test_enemy.update(dt)
+        test_enemy1.update(dt)
+        test_enemy2.update(dt)
 
 
         # 화면 렌더링
@@ -117,6 +123,8 @@ def animation_test_loop(screen):
 
         test_char.draw(screen)
         test_enemy.draw(screen)
+        test_enemy1.draw(screen)
+        test_enemy2.draw(screen)
 
         pygame.display.flip()
 

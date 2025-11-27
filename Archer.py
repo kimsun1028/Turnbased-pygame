@@ -65,15 +65,61 @@ class Archer(Character):
         target2.take_damage(damage)
     """
 
-    def basic_attack(self, target):
-        super().basic_attack(
-        target=target,
-        anim="Basic",
-        hit_frame=9,
-        damage=self.power,
-        move_in=False,
-        move_back=False
-        )
+    def basic_attack(self, target1=None, target2=None):
+        
+        """
+        아처 기본공격:
+        - 두 명의 적을 타격 (target1, target2)
+        - 타겟을 지정하지 않으면 살아있는 적을 자동 선택
+        - 적이 1명만 남으면 그 적을 두 번 타격
+        - 원거리 캐릭이므로 이동 없음
+        """
+
+        # 🔥 살아있는 적 리스트
+        enemies = Field.enemies_alive()
+
+        if len(enemies) == 0:
+            print("타격할 대상이 없습니다.")
+            return
+
+        # 🔥 target1 자동 보정
+        if target1 is None:
+            target1 = enemies[0]
+
+        # 🔥 target2 처리
+        if len(enemies) == 1:
+            # 적이 1명 → 두 번 공격
+            target2 = target1
+        else:
+            if target2 is None:
+                # 두 명 이상일 때 target2 자동 선택
+                # 단 target1과 동일하면 다음 적으로
+                for e in enemies:
+                    if e != target1:
+                        target2 = e
+                        break
+            # 그래도 None인 경우 (적이 1명뿐이라는 뜻)
+            if target2 is None:
+                target2 = target1
+
+        # 🔥 원거리 데미지 계산
+        damage = int(self.power * 0.75)
+
+        # 🔥 기존 행동 제거
+        self.queue_clear()
+
+        # 1) 공격 애니메이션 재생
+        self.queue_push("Basic", None)
+
+        # 2) 타격 예약
+        # 첫 번째 타격 - 2프레임
+        self.hit_on_frame("Basic", frame_index=7, target=target1, damage=damage)
+
+        # 두 번째 타격 - 4프레임
+        self.hit_on_frame("Basic", frame_index=14, target=target2, damage=damage)
+
+        print(f"[아처 기본공격] {target1.job}, {target2.job} 에게 각각 {damage} 데미지!")
+
     def skill(self):
         """아처 스킬: 난사 → 랜덤 적에게 공격력 40% 피해를 10번 분배"""
         Field.skill_point -= 2
