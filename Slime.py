@@ -10,6 +10,12 @@ class Slime(Enemy):
         self.job = "슬라임"
         self.job_eng = "Slime"
         self.set_position(0,0)
+        self.add_anim("Idle",  scale=3, fps=8,  loop=True)
+        self.add_anim("Walk",  scale=3, fps=10, loop=True)
+        self.add_anim("Basic", scale=3, fps=10, loop=False)
+        self.add_anim("Hurt",  scale=3, fps=12, loop=False)
+        self.add_anim("Death", scale=3, fps=12, loop=False)
+        self.add_anim("Skill",  scale=3, fps=10, loop=True)
 
     def basic_attack(self):
         target = self.select_target()

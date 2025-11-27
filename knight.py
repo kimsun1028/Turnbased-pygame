@@ -39,32 +39,23 @@ class Knight(Character):
 
         print("적 도발 성공")
 
-    def basic_attack(self):
-        print("대상을 입력하세요 : ")
-        enemy_index = int(input().strip()) - 1
-
-        enemies_alive = Field.enemies_alive()
-        if enemy_index < 0 or enemy_index >= len(enemies_alive):
-            print("번호에 해당하는 적이 없습니다!")
-            return
-
-        target = enemies_alive[enemy_index]
-
-        # 도발 중 → 강화된 기본 공격
+    def basic_attack(self, target):
+        # TauntBasic 애니를 3프레임째에 타격하는 근접 공격
         if Field.is_taunt():
-            damage = self.power + (self.max_hp - self.current_hp) // 2
-            target.take_damage(damage)
-            print(
-                f"기본공격(강화)으로 {target.job}에게 {damage}의 피해를 입혔다!"
-            )
-        else:
-            damage = self.power
-            target.take_damage(damage)
-            print(
-                f"기본공격으로 {target.job}에게 {damage}의 피해를 입혔다!"
-            )
-
-        # 스킬포인트 생성
-        Field.skill_point += 1
-        if Field.skill_point > Field.max_skill_point:
-            Field.skill_point = Field.max_skill_point
+            damage = self.power + (self.max_hp - self.current_hp)//3
+            super().basic_attack(
+            target=target,
+            anim="TauntBasic",
+            hit_frame=5,
+            damage=damage,
+            move_in=True,
+            move_back=True
+        )
+        super().basic_attack(
+            target=target,
+            anim="Basic",
+            hit_frame=5,
+            damage=self.power,
+            move_in=True,
+            move_back=True
+        )

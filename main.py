@@ -1,8 +1,6 @@
 import pygame
 from PartySelect import PartySelect
 import Field
-import Dungeon
-import Knight
 from Slime import Slime
 
 
@@ -22,7 +20,6 @@ def animation_test_loop(screen):
     - 3: Hurt 애니메이션
     - 4: Death 애니메이션
     """
-    
 
 
     clock = pygame.time.Clock()
@@ -30,11 +27,9 @@ def animation_test_loop(screen):
 
     # 첫 번째 아군만 테스트 대상으로 사용
     test_char = Field.allies[0]
-    print(type(test_char))
-    print(test_char.__class__.__bases__)
-    print("set_position" in dir(test_char))
+    test_enemy = Field.enemies[0]
     test_char.set_position(400, 300)
-
+    test_enemy.set_position(660,300)
     # 화면 안내용 폰트
     font = pygame.font.SysFont("malgungothic", 28)
 
@@ -84,18 +79,14 @@ def animation_test_loop(screen):
                     test_char.queue_clear()
                     test_char.queue_push("Idle", None)
                 elif event.key == pygame.K_e:
-                    # 이동 후 평타 후 복귀
-                    x, y = test_char.position
-                    test_char.queue_clear()
-                    test_char.move_to((x+200,y+100))
-                    test_char.queue_push("TauntBasic",None)
-                    test_char.move_to((x,y))
-                elif event.key == pygame.K_RETURN:
+                    test_char.basic_attack(test_enemy)
                     # Enter → 테스트 종료
                     return
 
         # 업데이트
         test_char.update(dt)
+        test_enemy.update(dt)
+
 
         # 화면 렌더링
         screen.fill((30, 30, 30))
@@ -119,6 +110,7 @@ def animation_test_loop(screen):
             screen.blit(img, (20, 20 + i * 30))
 
         test_char.draw(screen)
+        test_enemy.draw(screen)
 
         pygame.display.flip()
 
@@ -127,7 +119,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((1280, 720))
     pygame.display.set_caption("Turn-Based PYGAME")
-
+    setup_first_floor()
     # 파티 선택
     party_scene = PartySelect(screen)
     party_scene.run()
