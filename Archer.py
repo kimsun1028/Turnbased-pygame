@@ -11,11 +11,10 @@ class Archer(Character):
             power=40,
             max_hp=100,
             job="아처",
+            job_eng="Archer",
             skill_cost=2,
             skill_name="난사(2)",
         )
-        self.set_animator("animation/Archer/Archer-Idle.png")
-        self.set_position(100,250)
 
     def basic_attack(self):
         """적 두 명에게 공격력 75%의 피해를 주는 기본 공격"""

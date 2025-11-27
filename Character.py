@@ -24,6 +24,13 @@ class Character:
         self.anim_queue = []
         self.queue_time = 0.0   # 현재 큐 내 항목 경과 시간
 
+        self.moving = False
+        self.move_start = None
+        self.move_target = None
+        self.move_speed = 300
+        self.move_duration = 0
+        self.move_elapsed = 0
+
     # 생존 정보
     @property
     def is_alive(self) -> bool:
@@ -45,35 +52,77 @@ class Character:
     def queue_clear(self):
         self.anim_queue.clear()
 
-    def queue_update(self, dt):
-        if not self.anim_queue:
-            if ("Idle" in self.animations 
-                and self.current_anim != "Idle" 
-                and self.is_alive):
+def queue_update(self, dt):
+    # 큐가 비었으면 Idle로 복귀
+    if not self.anim_queue:
+        if "Idle" in self.animations and self.current_anim != "Idle" and self.is_alive:
+            idle_anim = self.animations["Idle"]
+            idle_anim.reset()
+            self.current_anim = "Idle"
+        return
 
-                anim = self.animations["Idle"]
-                anim.reset()
-                self.current_anim = "Idle"
-            return
-        
-        state, duration = self.anim_queue[0]
+    state, data = self.anim_queue[0]
 
-        if self.current_anim != state:
-            anim = self.animations[state]
-            anim.reset()
-            self.current_anim = state
-            self.queue_time = 0.0
+    # ────────────────────────────
+    #       1) 이동 명령 처리
+    # ────────────────────────────
+    if state == "__move__":
+        start_pos, target_pos, duration = data
 
-        self.queue_time += dt
+        # 이동 시작 초기화
+        if not self.moving:
+            self.moving = True
+            self.move_start = start_pos
+            self.move_target = target_pos
+            self.move_duration = duration
+            self.move_elapsed = 0.0
 
-        if duration is not None:
-            if self.queue_time >= duration:
-                self.anim_queue.pop(0)
-                return
+            # Walk 애니로 전환
+            if "Walk" in self.animations and self.current_anim != "Walk":
+                self.animations["Walk"].reset()
+                self.current_anim = "Walk"
 
+        # 이동 진행
+        self.move_elapsed += dt
+        t = min(self.move_elapsed / self.move_duration, 1.0)
+
+        # 보간 (linear interpolation)
+        sx, sy = self.move_start
+        tx, ty = self.move_target
+        nx = sx + (tx - sx) * t
+        ny = sy + (ty - sy) * t
+        self.position = (nx, ny)
+
+        # 이동 종료
+        if t >= 1.0:
+            self.moving = False
+            self.anim_queue.pop(0)
+        return  # 이동은 여기서 종료
+
+    # ────────────────────────────
+    #       2) 일반 애니메이션 처리
+    # ────────────────────────────
+    state, duration = self.anim_queue[0]
+
+    if self.current_anim != state:
         anim = self.animations[state]
-        if duration is None and anim.finished:
-            self.anim_queue.pop(0)    
+        anim.reset()
+        self.current_anim = state
+        self.queue_time = 0.0
+
+    self.queue_time += dt
+
+    # duration이 있는 경우
+    if duration is not None:
+        if self.queue_time >= duration:
+            self.anim_queue.pop(0)
+            return
+
+    # duration이 None이고 애니가 끝난 경우
+    anim = self.animations[state]
+    if duration is None and anim.finished:
+        self.anim_queue.pop(0)
+
 
     # 애니메이션 업데이트 메서드
     def update(self, dt):
@@ -89,6 +138,10 @@ class Character:
     # 위치 설정 메서드
     def set_position(self,x,y):
         self.position = (x,y)
+
+    def move_to(self, target_pos, duration = None):
+        self.move_target = target_pos
+        self.anim_queue.append(("__move__",duration))
     
 
 
