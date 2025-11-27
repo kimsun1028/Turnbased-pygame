@@ -22,12 +22,17 @@ def animation_test_loop(screen):
     - 3: Hurt 애니메이션
     - 4: Death 애니메이션
     """
+    
+
 
     clock = pygame.time.Clock()
     running = True
 
     # 첫 번째 아군만 테스트 대상으로 사용
     test_char = Field.allies[0]
+    print(type(test_char))
+    print(test_char.__class__.__bases__)
+    print("set_position" in dir(test_char))
     test_char.set_position(400, 300)
 
     # 화면 안내용 폰트

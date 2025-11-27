@@ -99,9 +99,6 @@ def queue_update(self, dt):
             self.anim_queue.pop(0)
         return  # 이동은 여기서 종료
 
-    # ────────────────────────────
-    #       2) 일반 애니메이션 처리
-    # ────────────────────────────
     state, duration = self.anim_queue[0]
 
     if self.current_anim != state:
@@ -110,7 +107,7 @@ def queue_update(self, dt):
         self.current_anim = state
         self.queue_time = 0.0
 
-    self.queue_time += dt
+        self.queue_time += dt
 
     # duration이 있는 경우
     if duration is not None:
@@ -119,33 +116,34 @@ def queue_update(self, dt):
             return
 
     # duration이 None이고 애니가 끝난 경우
-    anim = self.animations[state]
-    if duration is None and anim.finished:
-        self.anim_queue.pop(0)
+        anim = self.animations[state]
+        if duration is None and anim.finished:
+            self.anim_queue.pop(0)
 
 
     # 애니메이션 업데이트 메서드
-    def update(self, dt):
-        self.queue_update(dt)
-        if self.current_anim:
-            self.animations[self.current_anim].update(dt)
+def update(self, dt):
+    self.queue_update(dt)
+    if self.current_anim:
+        self.animations[self.current_anim].update(dt)
 
     # 화면 출력 메서드
-    def draw(self,screen):
-        if self.current_anim:
-            self.animations[self.current_anim].draw(screen, self.position)
-
+def draw(self,screen):
+    if self.current_anim:
+        self.animations[self.current_anim].draw(screen, self.position)    
+    
     # 위치 설정 메서드
-    def set_position(self,x,y):
-        self.position = (x,y)
+def set_position(self,x,y):
+    self.position = (x,y)    
 
-    def move_to(self, target_pos, duration = None):
-        self.move_target = target_pos
-        self.anim_queue.append(("__move__",duration))
+
+def move_to(self, target_pos, duration = None):
+    self.move_target = target_pos
+    self.anim_queue.append(("__move__",duration))    
     
 
 
-    # 기본공격 메서드 (특정 class 오버라이드)
+# 기본공격 메서드 (특정 class 오버라이드)
     """
     def basic_attack(self):
         print("대상을 입력하세요 : ")
@@ -172,33 +170,33 @@ def queue_update(self, dt):
     """
     # 스킬 메서드
     # 자식 클래스에서 반드시 오버라이드!!!!
-    def skill(self):        
-        raise NotImplementedError
+def skill(self):        
+    raise NotImplementedError    
 
     # 데미지를 입는 메서드
-    def take_damage(self, damage):
-        self.current_hp -= damage
+def take_damage(self, damage):
+    self.current_hp -= damage
 
-        if self.current_hp <= 0:
-            self.current_hp = 0
-            print(f"{self.job}이(가) {damage}의 피해를 입고 사망했습니다.")
-            self.queue_push("Death", None)
-        else:
-            print(
-                f"{self.job}이(가) {damage}의 피해를 입었습니다. "
-                f"(HP : {self.current_hp}/{self.max_hp})"
-            )
-            self.queue_push("Hurt", 0.3)
-
-    def heal(self, amount):
-        heal_amount = min(amount, self.max_hp - self.current_hp)
-        self.current_hp += heal_amount
+    if self.current_hp <= 0:
+        self.current_hp = 0
+        print(f"{self.job}이(가) {damage}의 피해를 입고 사망했습니다.")
+        self.queue_push("Death", None)
+    else:
         print(
-            f"{self.job}이(가) {heal_amount}만큼 체력을 회복했습니다! "
+            f"{self.job}이(가) {damage}의 피해를 입었습니다. "
             f"(HP : {self.current_hp}/{self.max_hp})"
         )
-        self.queue_push("Heal",0.5)
+        self.queue_push("Hurt", 0.3)
 
-    def can_use_skill(self) -> bool:
-        return Field.skill_point >= self.skill_cost
+def heal(self, amount):
+    heal_amount = min(amount, self.max_hp - self.current_hp)
+    self.current_hp += heal_amount
+    print(
+        f"{self.job}이(가) {heal_amount}만큼 체력을 회복했습니다! "
+        f"(HP : {self.current_hp}/{self.max_hp})"
+    )
+    self.queue_push("Heal",0.5)
+
+def can_use_skill(self) -> bool:
+    return Field.skill_point >= self.skill_cost    
 
