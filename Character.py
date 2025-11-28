@@ -1,7 +1,6 @@
 import Field
 import Animation
-
-
+from Effects import StaticEffect, ProjectileEffect
 class Character:
     def __init__(self, power=0, max_hp=0, job="", job_eng="", skill_cost=0, skill_name=""):
         # 기본 스탯
@@ -186,25 +185,65 @@ class Character:
                 anim.update(dt)
 
         # 3) 타격 이벤트 처리
+     # ----- 타격 이벤트 처리 + Projectile 생성 -----
         if self.hit_events:
             for ev in self.hit_events[:]:
                 ev["time"] -= dt
+
                 if ev["time"] <= 0:
+
+                    # 🔥 Projectile 생성 이벤트
+                    if "spawn_arrow" in ev:
+
+                        target = ev["target"]
+                        damage = ev["damage"]
+
+                        # 아처 중심 좌표 구하기
+                        frame = self.animations[self.current_anim].frames[0]
+                        w, h = frame.get_size()
+                        sx = self.position[0] + w//2
+                        sy = self.position[1] + h//2
+
+                        # 타겟 중심 좌표 구하기
+                        t_frame = target.animations[target.current_anim].frames[0]
+                        tw, th = t_frame.get_size()
+                        tx = target.position[0] + tw//2
+                        ty = target.position[1] + th//2
+
+                        # ProjectileEffect 생성
+                        Field.effects.add(
+                            ProjectileEffect(
+                                "animation/Archer/Archer-Arrow.png",
+                                start_pos=(sx, sy),
+                                target=target,
+                                speed=3000,
+                                on_hit=lambda t, dmg=damage: t.take_damage(dmg)
+                            )
+                        )
+
+                        self.hit_events.remove(ev)
+                        continue
+                        
+                # -----------------------------
+                # 🔥 일반 타격 처리 (근접, Priest 힐 아님)
+                # -----------------------------
+                if "target" in ev:
                     target = ev["target"]
-                    damage = ev["damage"]
+                    dmg = ev["damage"]
+                    if target and target.is_alive:
+                        target.take_damage(dmg)
+
                     self.hit_events.remove(ev)
 
-                    if target is not None and getattr(target, "is_alive", True):
-                        target.take_damage(damage)
+
 
     # ---------------------------------------------------------
     # draw
     # ---------------------------------------------------------
     def draw(self, screen):
-        if self.current_anim:
-            anim = self.animations.get(self.current_anim)
-            if anim:
-                anim.draw(screen, self.position)
+        frame = self.animations[self.current_anim].frames[self.animations[self.current_anim].current_frame]
+        w, h = frame.get_size()
+        screen.blit(frame, (self.position[0] - w//2, self.position[1] - h//2))
 
     # ---------------------------------------------------------
     # 위치 지정

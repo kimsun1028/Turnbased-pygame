@@ -1,6 +1,6 @@
 import time
 import random
-
+from Animation import SpriteAnimator
 import Field
 from Character import Character
 
@@ -65,60 +65,43 @@ class Archer(Character):
         target2.take_damage(damage)
     """
 
-    def basic_attack(self, target1=None, target2=None):
-        
-        """
-        아처 기본공격:
-        - 두 명의 적을 타격 (target1, target2)
-        - 타겟을 지정하지 않으면 살아있는 적을 자동 선택
-        - 적이 1명만 남으면 그 적을 두 번 타격
-        - 원거리 캐릭이므로 이동 없음
-        """
+    def basic_attack(self, target1, target2=None):
 
-        # 🔥 살아있는 적 리스트
-        enemies = Field.enemies_alive()
-
-        if len(enemies) == 0:
-            print("타격할 대상이 없습니다.")
-            return
-
-        # 🔥 target1 자동 보정
-        if target1 is None:
-            target1 = enemies[0]
-
-        # 🔥 target2 처리
-        if len(enemies) == 1:
-            # 적이 1명 → 두 번 공격
-            target2 = target1
-        else:
-            if target2 is None:
-                # 두 명 이상일 때 target2 자동 선택
-                # 단 target1과 동일하면 다음 적으로
-                for e in enemies:
-                    if e != target1:
-                        target2 = e
-                        break
-            # 그래도 None인 경우 (적이 1명뿐이라는 뜻)
-            if target2 is None:
-                target2 = target1
-
-        # 🔥 원거리 데미지 계산
-        damage = int(self.power * 0.75)
-
-        # 🔥 기존 행동 제거
         self.queue_clear()
 
-        # 1) 공격 애니메이션 재생
-        self.queue_push("Basic", None)
+        anim = "Basic"
+        hit1_frame = 8
+        hit2_frame = 14
 
-        # 2) 타격 예약
-        # 첫 번째 타격 - 2프레임
-        self.hit_on_frame("Basic", frame_index=7, target=target1, damage=damage)
+        self.queue_push(anim, None)
 
-        # 두 번째 타격 - 4프레임
-        self.hit_on_frame("Basic", frame_index=14, target=target2, damage=damage)
+        # 첫 타격 대상
+        if target1 and target1.is_alive:
+            self.spawn_arrow_on_frame(anim, hit1_frame, target1, self.power)
 
-        print(f"[아처 기본공격] {target1.job}, {target2.job} 에게 각각 {damage} 데미지!")
+        # 두 번째 대상 선택
+        if target2 is None or not target2.is_alive:
+            target2 = target1
+
+        # 두 번째 화살
+        self.spawn_arrow_on_frame(anim, hit2_frame, target2, self.power)
+
+
+
+    # =====================================================
+    # 화살 이펙트를 특정 프레임에 맞춰 생성하는 함수
+    # =====================================================
+    def spawn_arrow_on_frame(self, anim_name, frame_index, target, damage):
+
+        anim = self.animations[anim_name]
+        delay = frame_index * anim.time_per_frame
+
+        self.hit_events.append({
+            "time": delay,
+            "spawn_arrow": True,
+            "target": target,
+            "damage": damage
+        })
 
     def skill(self):
         """아처 스킬: 난사 → 랜덤 적에게 공격력 40% 피해를 10번 분배"""
@@ -144,3 +127,24 @@ class Archer(Character):
             )
             target.take_damage(damage_per_hit)
             time.sleep(0.3)
+    def add_arrow_effect(self, frame_index, target):
+
+        # 화살 애니메이션 로드
+        arrow_anim = SpriteAnimator(
+            "animation/Archer/Archer-Arrow.png",
+            scale=2.0,
+            loop=False,
+            duration=0.15
+        )
+
+        # 화살 출발 위치는 아처 중심
+        sx, sy = self.position
+
+        # 도착 위치는 타겟 중심 (offset으로 보정 가능)
+        tx, ty = target.position
+
+        # 호출 시점이 hit_on_frame보다 약간 빨라야 자연스럽다
+        self.hit_events.append({
+            "time": frame_index * self.animations["Basic"].time_per_frame - 0.05,
+            "spawn_arrow": (arrow_anim, (sx, sy), (tx, ty))
+        })

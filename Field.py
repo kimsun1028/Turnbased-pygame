@@ -1,3 +1,7 @@
+from Effects import EffectManager
+effects = EffectManager()
+
+
 remain_taunt_turn = 0
 skill_point = 2
 max_skill_point = 4

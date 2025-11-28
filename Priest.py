@@ -1,47 +1,63 @@
 import Field
 from Character import Character
-
+from Effects import StaticEffect
+from Animation import SpriteAnimator
 
 class Priest(Character):
     def __init__(self):
         super().__init__(
-            power=30,
-            max_hp=70,
+            power=20,
+            max_hp=200,
             job="프리스트",
             job_eng="Priest",
             skill_cost=1,
-            skill_name="힐/딜(1)",
+            skill_name="힐"   # 이전의 "힐 or 딜 선택" 구조를 버림
         )
 
+    def skill(self, idx):
+        """
+        스킬: 힐
+        idx: allies_alive()에서 힐할 대상의 index
+        """
 
-    def skill(self):
-        Field.skill_point -= 1
-        print("스킬유형을 선택하세요  힐(1) / 딜(2)")
-        mode = input().strip()
+        # 살아있는 아군 목록 가져오기
+        alive_allies = Field.allies_alive()
 
-        # 힐
-        if mode == "1":
-            allies_alive = Field.allies_alive()
-            print("아군 대상을 선택하세요:")
-            idx = int(input().strip()) - 1
+        # idx 범위 체크
+        if idx < 0 or idx >= len(alive_allies):
+            print("잘못된 대상입니다.")
+            return
 
-            if 0 <= idx < len(allies_alive):
-                target = allies_alive[idx]
-                target.heal(self.power * 2)
-            else:
-                print("잘못된 대상입니다.")
+        # 대상 선택
+        target = alive_allies[idx]
 
-        # 딜
-        elif mode == "2":
-            enemies_alive = Field.enemies_alive()
-            print("적 대상을 선택하세요:")
-            idx = int(input().strip()) - 1
+        # 스킬포인트 체크
+        if Field.skill_point < self.skill_cost:
+            print("스킬 포인트 부족!")
+            return
 
-            if 0 <= idx < len(enemies_alive):
-                target = enemies_alive[idx]
-                target.take_damage(int(self.power * 1.5))
-            else:
-                print("잘못된 대상입니다.")
+        Field.skill_point -= self.skill_cost
 
-        else:
-            print("잘못된 입력입니다.")
+        # Priest 스킬 애니메이션
+        self.queue_clear()
+        self.queue_push("Skill", None)
+
+        # 힐량 계산
+        heal_amount = int(self.power * 2.0)
+
+        # 실제 힐 적용
+        target.heal(heal_amount)
+
+        # 🔥 힐 이펙트 추가
+        heal_anim = SpriteAnimator(
+            "animation/Priest/Priest-Heal_Effect.png",
+            scale=2.0,
+            loop=False,
+            duration=0.6
+        )
+        tx, ty = target.position
+        Field.effects.add(
+            StaticEffect(heal_anim, (tx-100, ty-100), duration=0.6)
+        )
+
+        print(f"[프리스트 힐] {target.job}에게 {heal_amount} 회복!")

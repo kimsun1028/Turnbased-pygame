@@ -41,6 +41,7 @@ class Knight(Character):
 
     def basic_attack(self, target):
         # TauntBasic 애니를 3프레임째에 타격하는 근접 공격
+        Field.skill_point += 1
         if Field.is_taunt():
             damage = self.power + (self.max_hp - self.current_hp)//3
             super().basic_attack(

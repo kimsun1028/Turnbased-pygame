@@ -4,6 +4,7 @@ import Field
 from Slime import Slime
 
 
+
 def setup_first_floor():
     Field.enemies = [
         Slime("슬라임1"),
@@ -11,122 +12,146 @@ def setup_first_floor():
         Slime("슬라임3"),
     ]
 
+def set_enemy_position():
+    Field.enemies[0].set_position(700, 200)
+    Field.enemies[1].set_position(700, 300)
+    Field.enemies[2].set_position(700, 400)
+
+
 
 def animation_test_loop(screen):
-    """
-    애니메이션 테스트 모드
-    - 1: MoveTo 테스트
-    - 2: Basic 애니메이션 재생
-    - 3: Hurt 애니메이션
-    - 4: Death 애니메이션
-    """
-
 
     clock = pygame.time.Clock()
     running = True
 
-    # 첫 번째 아군만 테스트 대상으로 사용
-    test_char = Field.allies[0]
-    test_enemy = Field.enemies[0]
-    test_enemy1 = Field.enemies[1]
-    test_enemy2 = Field.enemies[2]
-    test_char.set_position(400, 300)
-    test_enemy.set_position(660,300)
-    test_enemy1.set_position(660,200)
-    test_enemy2.set_position(660,400)
-    # 화면 안내용 폰트
+    # --- 아군 전체 불러오기 ---
+    allies = Field.allies   # [Knight, Archer, Priest]
+    enemies = Field.enemies
+
+    # --- 초기 선택 캐릭터: Knight ---
+    selected_idx = 0
+    test_char = allies[selected_idx]
+
+    # --- 포지션 배치 ---
+    # 아군 (왼쪽에 세 명)
+    allies[0].set_position(300, 200)   # Knight
+    allies[1].set_position(300, 300)   # Archer
+    allies[2].set_position(300, 400)   # Priest
+
+    # 적 (오른쪽에 세 명)
+    set_enemy_position()
+
+
     font = pygame.font.SysFont("malgungothic", 28)
 
     while running:
-        dt = clock.tick(60) / 1000.0  # dt = 초 단위
-        
+
+        dt = clock.tick(60) / 1000.0
+
+        # -------------------------
+        # 키 입력 처리
+        # -------------------------
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-            # 키보드 입력 애니메이션 테스트
             if event.type == pygame.KEYDOWN:
+
+                # 🔥 1, 2, 3 → 캐릭터 선택
                 if event.key == pygame.K_1:
-                    # MoveTo 테스트: 오른쪽으로 200px 이동
-                    x, y = test_char.position
-                    test_char.move_to((x + 200, y))
-                
+                    selected_idx = 0
+                    test_char = allies[selected_idx]
+                    print("선택: 나이트")
+
                 elif event.key == pygame.K_2:
-                    # Walk 뒤로 (왼쪽)
-                    x, y = test_char.position
-                    test_char.move_to((x - 200, y))
+                    selected_idx = 1
+                    test_char = allies[selected_idx]
+                    print("선택: 아처")
 
                 elif event.key == pygame.K_3:
-                    # Basic 공격 모션
-                    test_char.queue_clear()
-                    test_char.queue_push("Basic", None)
+                    selected_idx = 2
+                    test_char = allies[selected_idx]
+                    print("선택: 프리스트")
 
+                # --- 아래는 test_char에만 적용되는 테스트 입력 ---
                 elif event.key == pygame.K_4:
-                    # Skill 모션
                     test_char.queue_clear()
-                    Field.remain_taunt_turn = 2
                     test_char.queue_push("Skill", None)
 
                 elif event.key == pygame.K_5:
-                    # Hurt 모션
                     test_char.queue_clear()
                     test_char.queue_push("Hurt", 0.4)
 
                 elif event.key == pygame.K_6:
-                    # Death 모션
                     test_char.queue_clear()
                     test_char.queue_push("Death", None)
 
-                elif event.key == pygame.K_7 :
-                    test_enemy = Field.enemies.pop()
+                elif event.key == pygame.K_e:
+                    test_char.basic_attack(Field.enemies_alive()[0])
 
-                
+                elif event.key == pygame.K_h:
+                    # Priest 스킬 테스트: allies_alive()[0] 힐
+                    if test_char.job == "프리스트":
+                        test_char.skill(0)  # 예: 첫번째 아군을 힐
+                elif event.key == pygame.K_n:
+                    setup_first_floor()
+                    set_enemy_position()
 
                 elif event.key == pygame.K_SPACE:
-                    # Idle로 강제 복귀
                     test_char.queue_clear()
                     test_char.queue_push("Idle", None)
-                elif event.key == pygame.K_e:
-                    test_char.basic_attack(test_enemy)
-                    # Enter → 테스트 종료
 
                 elif event.key == pygame.K_RETURN:
                     return
 
+
+        # -------------------------
         # 업데이트
-        test_char.update(dt)
-        test_enemy.update(dt)
-        test_enemy1.update(dt)
-        test_enemy2.update(dt)
+        # -------------------------
+        for a in allies:
+            a.update(dt)
+
+        for e in enemies:
+            e.update(dt)
+
+        Field.effects.update(dt)
 
 
-        # 화면 렌더링
+        # -------------------------
+        # 렌더링
+        # -------------------------
         screen.fill((30, 30, 30))
 
-        # 안내 텍스트 출력
+        # 안내 텍스트
         guide = [
             "애니메이션 테스트 모드",
-            "1: MoveTo (오른쪽으로 이동)",
-            "2: MoveTo (왼쪽으로 이동)",
-            "3: Basic 애니메이션",
-            "4: Skill 애니메이션",
-            "5: Hurt 애니메이션",
-            "6: Death 애니메이션",
-            "E: 이동 평타(강화) 모션 애니메이션"
-            "SPACE: Idle 복귀",
-            "ENTER: 테스트 종료"
+            "캐릭터 선택: 1=Knight, 2=Archer, 3=Priest",
+            f"현재 선택: {test_char.job}",
+            "",
+            "b: Basic",
+            "4: Skill",
+            "5: Hurt",
+            "6: Death",
+            "E: BasicAttack",
+            "H: Heal(Priest)",
+            "SPACE: Idle",
+            "ENTER: 종료"
         ]
 
         for i, line in enumerate(guide):
             img = font.render(line, True, (255, 255, 255))
-            screen.blit(img, (20, 20 + i * 30))
+            screen.blit(img, (20, 20 + i * 28))
 
-        test_char.draw(screen)
-        test_enemy.draw(screen)
-        test_enemy1.draw(screen)
-        test_enemy2.draw(screen)
+        # 아군/적 모두 출력
+        for a in allies:
+            a.draw(screen)
+        for e in enemies:
+            e.draw(screen)
+
+        Field.effects.draw(screen)
 
         pygame.display.flip()
+
 
 
 def main():

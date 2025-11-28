@@ -37,6 +37,11 @@ class PartySelect:
         except:
             pass
 
+        try:
+            character.add_anim("Heal_Effect", scale = 3, fps = 12, loop=False)
+        except:
+            pass
+
     def run(self):
         running = True
 
