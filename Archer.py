@@ -19,7 +19,6 @@ class Archer(Character):
     def basic_attack(self, target1, target2=None):
 
         self.queue_clear()
-
         anim = "Basic"
         hit1_frame = 8
         hit2_frame = 14
@@ -49,26 +48,28 @@ class Archer(Character):
         """아처 스킬: 난사 → 랜덤 적에게 공격력 40% 피해를 10번 분배"""
         Field.skill_point -= 2
         print("아처가 '화살 난사'를 시전합니다!")
-
         total_hits = 10
         damage_per_hit = int(self.power * 0.4)
-
+        self.queue_clear()
+        anim = "Skill"
+        hit_start_frame = 12
+        dmg = self.power
+        self.queue_push(anim, None)
+        
         for _ in range(total_hits):
             enemies_alive = Field.enemies_alive()
-
             # 적이 모두 죽었으면 스킬 종료
             if not enemies_alive:
-                print("모든 적이 쓰러져 난사가 조기에 종료됩니다!")
+                self.queue_clear()
                 break
-
             target = random.choice(enemies_alive)
 
-            print(
-                f"→ {target.job}이(가) 난사 타격을 맞습니다! "
-                f"({damage_per_hit} 피해)"
-            )
-            target.take_damage(damage_per_hit)
-            time.sleep(0.3)
+            # -----------------------------
+            # 첫 번째 타격
+            # -----------------------------
+            self.hit_on_frame(anim, hit_start_frame, target,  damage_per_hit*3)
+            hit_start_frame += 6
+
     def add_arrow_effect(self, frame_index, target):
 
         # 화살 애니메이션 로드

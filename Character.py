@@ -262,7 +262,6 @@ class Character:
 
     def take_damage(self, damage):
         self.current_hp -= damage
-
         if self.current_hp <= 0:
             self.current_hp = 0
             print(f"{self.job}이(가) {damage} 피해를 받고 사망했습니다!")
@@ -276,7 +275,6 @@ class Character:
             f"(HP: {self.current_hp}/{self.max_hp})"
         )
 
-        # 🔥 Hurt 애니 강제 재생 (연속 재생도 허용)
         if "Hurt" in self.animations:
             self.queue_push("Hurt")
 
@@ -311,15 +309,6 @@ class Character:
         move_in=True,
         move_back=True,
     ):
-        """
-        기본 공격:
-        - move_in=True  이면 적 앞으로 이동 후 공격
-        - move_back=True 이면 원위치로 복귀
-        - anim       : 사용할 애니메이션 이름
-        - hit_frame  : 타격이 들어가는 프레임 인덱스
-        - damage     : None이면 self.power 사용
-        """
-
         if damage is None:
             damage = self.power
 

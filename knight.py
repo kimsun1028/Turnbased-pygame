@@ -3,23 +3,14 @@ from Character import Character
 
 class Knight(Character):
     def __init__(self):
-        super().__init__(power=40, max_hp=300, job="나이트", job_eng="Knight",
+        super().__init__(power=40, max_hp=150, job="나이트", job_eng="Knight",
                          skill_cost=2, skill_name="도발")
 
 
     def take_damage(self, damage: int):
-        self.current_hp -= damage
-
-        # 죽었을 때 도발 즉시 해제
-        if self.current_hp <= 0:
-            self.current_hp = 0
+        super().take_damage(self, damage)
+        if self.current_hp == 0:
             Field.remain_taunt_turn = 0
-            print(f"{self.job}이(가) {damage}의 피해를 입고 사망했습니다.")
-        else:
-            print(
-                f"{self.job}이(가) {damage}의 피해를 입었습니다. "
-                f"(HP : {self.current_hp}/{self.max_hp})"
-            )
 
     def skill(self):
         """도발 스킬"""
@@ -37,7 +28,7 @@ class Knight(Character):
         # 스킬포인트 소모
         Field.skill_point -= 1
 
-        print("적 도발 성공")
+        self.anim_queue.append("Skill")
 
     def basic_attack(self, target):
         # TauntBasic 애니를 3프레임째에 타격하는 근접 공격

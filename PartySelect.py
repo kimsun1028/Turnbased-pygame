@@ -31,7 +31,10 @@ class PartySelect:
 
         # 스킬 파일이 존재하면 자동 등록
         try:
-            character.add_anim("Skill", scale=3, fps=12, loop=False)
+            if character.job == "아처":
+                character.add_anim("Skill", scale=3, fps=12, loop=False, duration = 2.0)
+            else:
+                character.add_anim("Skill", scale=3, fps=12, loop=False)
         except:
             pass  # 스킬 파일 없으면 무시
 

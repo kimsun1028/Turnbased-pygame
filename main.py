@@ -76,7 +76,10 @@ def animation_test_loop(screen):
                 # --- 아래는 test_char에만 적용되는 테스트 입력 ---
                 elif event.key == pygame.K_4:
                     test_char.queue_clear()
-                    test_char.queue_push("Skill", None)
+                    if test_char.job == "아처":
+                        test_char.skill()
+                    else:
+                        test_char.queue_push("Skill", None)
 
                 elif event.key == pygame.K_5:
                     test_char.queue_clear()
@@ -87,7 +90,14 @@ def animation_test_loop(screen):
                     test_char.queue_push("Death", None)
 
                 elif event.key == pygame.K_e:
-                    test_char.basic_attack(Field.enemies_alive()[0])
+                    
+                    if test_char.job == "아처":
+                        if Field.enemies_alive() == 2:
+                            test_char.basic_attack(Field.enemies_alive()[0],Field.enemies_alive()[1])
+                        else:
+                            test_char.basic_attack(Field.enemies_alive()[0])
+                    else:
+                        test_char.basic_attack(Field.enemies_alive()[0])
 
                 elif event.key == pygame.K_h:
                     # Priest 스킬 테스트: allies_alive()[0] 힐
