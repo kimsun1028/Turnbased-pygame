@@ -22,7 +22,10 @@ class PartySelect:
 
         character.add_anim("Idle",  scale=3, fps=8,  loop=True)
         character.add_anim("Walk",  scale=3, fps=10, loop=True)
-        character.add_anim("Basic", scale=3, fps=10, loop=False)
+        if character.job == "아처":
+            character.add_anim("Basic", scale=3, fps=10, loop=False, duration = 1.0)
+        else: 
+            character.add_anim("Basic", scale=3, fps=10, loop=False)
         character.add_anim("Hurt",  scale=3, fps=12, loop=False)
         character.add_anim("Death", scale=3, fps=12, loop=False)
 

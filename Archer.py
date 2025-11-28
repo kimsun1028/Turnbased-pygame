@@ -16,55 +16,6 @@ class Archer(Character):
             skill_name="난사(2)",
         )
 
-    """
-    def basic_attack(self):
-        damage = int(self.power * 0.75)
-
-        enemies_alive = Field.enemies_alive()
-
-        # 남은 적이 한 명일 때
-        if len(enemies_alive) == 1:
-            only = enemies_alive[0]
-            print("남은 적이 한 명입니다! 동일 대상에게 2회 타격!")
-            only.take_damage(damage)
-            only.take_damage(damage)
-            return
-
-        # 대상 2명 입력 받기
-        print("대상 두 명을 차례대로 입력하세요:")
-
-        # 첫 번째 대상
-        while True:
-            try:
-                idx1 = int(input().strip()) - 1
-                if 0 <= idx1 < len(enemies_alive):
-                    break
-                print("번호에 해당하는 적이 없습니다! 다시 입력:")
-            except ValueError:
-                print("숫자를 입력하세요!")
-
-        # 두 번째 대상
-        while True:
-            try:
-                idx2 = int(input().strip()) - 1
-                if 0 <= idx2 < len(enemies_alive):
-                    if idx2 != idx1:
-                        break
-                    print("같은 대상을 선택할 수 없습니다! 다시 입력:")
-                else:
-                    print("번호에 해당하는 적이 없습니다! 다시 입력:")
-            except ValueError:
-                print("숫자를 입력하세요!")
-
-        # 최종 대상
-        enemies_alive = Field.enemies_alive()
-        target1 = enemies_alive[idx1]
-        target2 = enemies_alive[idx2]
-
-        target1.take_damage(damage)
-        target2.take_damage(damage)
-    """
-
     def basic_attack(self, target1, target2=None):
 
         self.queue_clear()
@@ -72,36 +23,27 @@ class Archer(Character):
         anim = "Basic"
         hit1_frame = 8
         hit2_frame = 14
+        dmg = self.power
 
+        # 기본 공격 애니 재생
         self.queue_push(anim, None)
 
-        # 첫 타격 대상
+        # -----------------------------
+        # 첫 번째 타격
+        # -----------------------------
         if target1 and target1.is_alive:
-            self.spawn_arrow_on_frame(anim, hit1_frame, target1, self.power)
+            self.hit_on_frame(anim, hit1_frame, target1, dmg)
 
-        # 두 번째 대상 선택
+        # -----------------------------
+        # 두 번째 대상 결정
+        # -----------------------------
         if target2 is None or not target2.is_alive:
             target2 = target1
 
-        # 두 번째 화살
-        self.spawn_arrow_on_frame(anim, hit2_frame, target2, self.power)
-
-
-
-    # =====================================================
-    # 화살 이펙트를 특정 프레임에 맞춰 생성하는 함수
-    # =====================================================
-    def spawn_arrow_on_frame(self, anim_name, frame_index, target, damage):
-
-        anim = self.animations[anim_name]
-        delay = frame_index * anim.time_per_frame
-
-        self.hit_events.append({
-            "time": delay,
-            "spawn_arrow": True,
-            "target": target,
-            "damage": damage
-        })
+        # -----------------------------
+        # 두 번째 타격
+        # -----------------------------
+        self.hit_on_frame(anim, hit2_frame, target2, dmg)
 
     def skill(self):
         """아처 스킬: 난사 → 랜덤 적에게 공격력 40% 피해를 10번 분배"""

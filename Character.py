@@ -49,13 +49,13 @@ class Character:
     # ---------------------------------------------------------
     # 애니메이션 추가
     # ---------------------------------------------------------
-    def add_anim(self, state, scale=2.0, fps=8, loop=True):
+    def add_anim(self, state, scale=2.0, fps=8, loop=True, duration = 0.5):
         """
         state: "Idle", "Walk", "Basic", "Skill", "Hurt", "Death" 등
         animation/{job_eng}/{job_eng}-{state}.png 를 스프라이트 시트로 사용
         """
         path = f"animation/{self.job_eng}/{self.job_eng}-{state}.png"
-        self.animations[state] = Animation.SpriteAnimator(path, scale, fps, loop)
+        self.animations[state] = Animation.SpriteAnimator(path, scale, fps, loop, duration)
 
         if self.current_anim is None:
             self.current_anim = state
@@ -175,65 +175,44 @@ class Character:
     # update
     # ---------------------------------------------------------
     def update(self, dt):
-        # 1) 애니메이션/이동 큐 업데이트
+
+    # ---------------------------------------------
+    # 1) 애니메이션 & 이동 큐 업데이트
+    # ---------------------------------------------
         self.queue_update(dt)
 
-        # 2) 현재 애니 프레임 업데이트
+        # ---------------------------------------------
+        # 2) 현재 애니메이션의 프레임 업데이트
+        # ---------------------------------------------
         if self.current_anim:
             anim = self.animations.get(self.current_anim)
             if anim:
                 anim.update(dt)
 
-        # 3) 타격 이벤트 처리
-     # ----- 타격 이벤트 처리 + Projectile 생성 -----
+        # ---------------------------------------------
+        # 3) hit_events 처리 (딜레이 후 데미지 적용)
+        # ---------------------------------------------
         if self.hit_events:
+            # 복사본을 사용하여 루프 중 삭제 안전하게
             for ev in self.hit_events[:]:
                 ev["time"] -= dt
 
-                if ev["time"] <= 0:
+                # 아직 실행될 시간이 안 됨
+                if ev["time"] > 0:
+                    continue
 
-                    # 🔥 Projectile 생성 이벤트
-                    if "spawn_arrow" in ev:
-
-                        target = ev["target"]
-                        damage = ev["damage"]
-
-                        # 아처 중심 좌표 구하기
-                        frame = self.animations[self.current_anim].frames[0]
-                        w, h = frame.get_size()
-                        sx = self.position[0] + w//2
-                        sy = self.position[1] + h//2
-
-                        # 타겟 중심 좌표 구하기
-                        t_frame = target.animations[target.current_anim].frames[0]
-                        tw, th = t_frame.get_size()
-                        tx = target.position[0] + tw//2
-                        ty = target.position[1] + th//2
-
-                        # ProjectileEffect 생성
-                        Field.effects.add(
-                            ProjectileEffect(
-                                "animation/Archer/Archer-Arrow.png",
-                                start_pos=(sx, sy),
-                                target=target,
-                                speed=3000,
-                                on_hit=lambda t, dmg=damage: t.take_damage(dmg)
-                            )
-                        )
-
-                        self.hit_events.remove(ev)
-                        continue
-                        
                 # -----------------------------
-                # 🔥 일반 타격 처리 (근접, Priest 힐 아님)
+                # 🔥 타격 이벤트 실행
                 # -----------------------------
-                if "target" in ev:
-                    target = ev["target"]
-                    dmg = ev["damage"]
-                    if target and target.is_alive:
-                        target.take_damage(dmg)
+                target = ev["target"]
+                damage = ev["damage"]
 
-                    self.hit_events.remove(ev)
+                if target is not None and target.is_alive:
+                    target.take_damage(damage)
+
+                # 이벤트 제거
+                self.hit_events.remove(ev)
+
 
 
 
@@ -287,15 +266,26 @@ class Character:
         if self.current_hp <= 0:
             self.current_hp = 0
             print(f"{self.job}이(가) {damage} 피해를 받고 사망했습니다!")
+            self.anim_queue.clear()
             if "Death" in self.animations:
                 self.queue_push("Death", None)
-        else:
-            print(
-                f"{self.job}이(가) {damage} 피해를 입었습니다. "
-                f"(HP: {self.current_hp}/{self.max_hp})"
-            )
-            if "Hurt" in self.animations:
-                self.queue_push("Hurt", 0.3)
+            return
+
+        print(
+            f"{self.job}이(가) {damage} 피해를 입었습니다. "
+            f"(HP: {self.current_hp}/{self.max_hp})"
+        )
+
+        # 🔥 Hurt 애니 강제 재생 (연속 재생도 허용)
+        if "Hurt" in self.animations:
+            # 현재 큐 무시하고 Hurt 재생을 queue 맨 앞에 삽입
+            self.anim_queue.insert(0, ("Hurt", 0.25))
+
+            # 현재 애니가 Hurt가 아니면 Hurt로 전환
+            self.animations["Hurt"].reset()
+            self.current_anim = "Hurt"
+
+
 
     def heal(self, amount):
         heal_amount = min(amount, self.max_hp - self.current_hp)
