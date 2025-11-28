@@ -76,8 +76,11 @@ def animation_test_loop(screen):
                 # --- 아래는 test_char에만 적용되는 테스트 입력 ---
                 elif event.key == pygame.K_4:
                     test_char.queue_clear()
-                    if test_char.job == "아처":
-                        test_char.skill()
+                    if test_char.job != "프리스트":
+                        try:
+                            test_char.skill()
+                        except:
+                            test_char.skill(Field.enemies_alive()[0])
                     else:
                         test_char.queue_push("Skill", None)
 
@@ -111,6 +114,10 @@ def animation_test_loop(screen):
                     test_char.queue_clear()
                     test_char.queue_push("Idle", None)
 
+                elif event.key == pygame.K_b:
+                    test_enemy = Field.enemies_alive()[0]
+                    test_enemy.basic_attack()
+
                 elif event.key == pygame.K_RETURN:
                     return
 
@@ -138,7 +145,7 @@ def animation_test_loop(screen):
             "캐릭터 선택: 1=Knight, 2=Archer, 3=Priest",
             f"현재 선택: {test_char.job}",
             "",
-            "b: Basic",
+            "b: Slime Basic",
             "4: Skill",
             "5: Hurt",
             "6: Death",

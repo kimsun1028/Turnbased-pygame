@@ -43,17 +43,15 @@ class Archer(Character):
         # 두 번째 타격
         # -----------------------------
         self.hit_on_frame(anim, hit2_frame, target2, dmg)
-
+    
     def skill(self):
-        """아처 스킬: 난사 → 랜덤 적에게 공격력 40% 피해를 10번 분배"""
-        Field.skill_point -= 2
+        Field.skill_point -= self.skill_cost
         print("아처가 '화살 난사'를 시전합니다!")
         total_hits = 10
         damage_per_hit = int(self.power * 0.4)
         self.queue_clear()
         anim = "Skill"
         hit_start_frame = 12
-        dmg = self.power
         self.queue_push(anim, None)
         
         for _ in range(total_hits):
@@ -61,17 +59,25 @@ class Archer(Character):
             # 적이 모두 죽었으면 스킬 종료
             if not enemies_alive:
                 self.queue_clear()
-                break
+                self.queue_push("Idle", None)
+                return
             target = random.choice(enemies_alive)
 
-            # -----------------------------
-            # 첫 번째 타격
-            # -----------------------------
+            expected_hp  = target.current_hp - damage_per_hit
+            if expected_hp <= 0:
+                enemies_alive.remove(target)
+                if not enemies_alive:
+                    self.queue_clear()
+                    self.queue_push("Idle", None)
+                    return
+                
+                target = random.choice(enemies_alive)
+
             self.hit_on_frame(anim, hit_start_frame, target,  damage_per_hit*3)
             hit_start_frame += 6
+            
 
     def add_arrow_effect(self, frame_index, target):
-
         # 화살 애니메이션 로드
         arrow_anim = SpriteAnimator(
             "animation/Archer/Archer-Arrow.png",

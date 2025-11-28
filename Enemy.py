@@ -23,3 +23,15 @@ class Enemy(Character):
             return None   # 공격할 대상 없음
 
         return random.choice(alive_allies)
+    def basic_attack(self, target, anim="Basic", hit_frame=5, damage=None, move_in=True, move_back=True, is_enemy=False):
+        if damage is None:
+            damage = self.power
+        super().basic_attack(
+            target=target,
+            anim=anim,
+            hit_frame=hit_frame,
+            damage=damage,
+            move_in=move_in,
+            move_back=move_back,
+            is_enemy=is_enemy
+        )

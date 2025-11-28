@@ -1,6 +1,6 @@
 import Field
 import Animation
-from Effects import StaticEffect, ProjectileEffect
+import  random
 class Character:
     def __init__(self, power=0, max_hp=0, job="", job_eng="", skill_cost=0, skill_name=""):
         # 기본 스탯
@@ -175,42 +175,42 @@ class Character:
     # update
     # ---------------------------------------------------------
     def update(self, dt):
-
-    # ---------------------------------------------
-    # 1) 애니메이션 & 이동 큐 업데이트
-    # ---------------------------------------------
         self.queue_update(dt)
-
-        # ---------------------------------------------
-        # 2) 현재 애니메이션의 프레임 업데이트
-        # ---------------------------------------------
         if self.current_anim:
             anim = self.animations.get(self.current_anim)
             if anim:
                 anim.update(dt)
 
-        # ---------------------------------------------
-        # 3) hit_events 처리 (딜레이 후 데미지 적용)
-        # ---------------------------------------------
         if self.hit_events:
-            # 복사본을 사용하여 루프 중 삭제 안전하게
             for ev in self.hit_events[:]:
                 ev["time"] -= dt
 
-                # 아직 실행될 시간이 안 됨
                 if ev["time"] > 0:
                     continue
 
-                # -----------------------------
-                # 🔥 타격 이벤트 실행
-                # -----------------------------
                 target = ev["target"]
                 damage = ev["damage"]
 
-                if target is not None and target.is_alive:
-                    target.take_damage(damage)
 
-                # 이벤트 제거
+                if target is None or not target.is_alive:
+                    from Field import enemies_alive
+                    alive = enemies_alive()
+
+                    if alive:
+                        new_target = random.choice(alive)
+                        new_target.take_damage(damage)
+                    # 적 전멸 → Skill 중단하고 Idle 복귀
+                    else:
+                        self.hit_events.remove(ev)
+                        self.queue_clear()
+                        self.queue_push("Idle", None)
+                        return
+
+                    self.hit_events.remove(ev)
+                    continue
+
+                # ---------- 정상 타격 ----------
+                target.take_damage(damage)
                 self.hit_events.remove(ev)
 
 
@@ -304,10 +304,11 @@ class Character:
         self,
         target,
         anim="Basic",
-        hit_frame=2,
+        hit_frame=5,
         damage=None,
         move_in=True,
         move_back=True,
+        is_enemy=False
     ):
         if damage is None:
             damage = self.power
@@ -318,9 +319,14 @@ class Character:
         ox, oy = self.position  # 원래 위치 저장
 
         # 1) 이동 (근접 캐릭터용)
-        if move_in and target is not None:
+        if move_in and target is not None and not is_enemy:
             tx, ty = target.position
             attack_x = tx - 100  # 적 왼쪽 100px 지점
+            attack_y = ty
+            self.move_to((attack_x, attack_y), duration=0.25)
+        elif move_in and target is not None and is_enemy:
+            tx, ty = target.position
+            attack_x = tx + 100  # 아군 오른쪽 100px 지점
             attack_y = ty
             self.move_to((attack_x, attack_y), duration=0.25)
 

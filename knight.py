@@ -8,7 +8,7 @@ class Knight(Character):
 
 
     def take_damage(self, damage: int):
-        super().take_damage(self, damage)
+        super().take_damage(damage)
         if self.current_hp == 0:
             Field.remain_taunt_turn = 0
 
@@ -28,7 +28,7 @@ class Knight(Character):
         # 스킬포인트 소모
         Field.skill_point -= 1
 
-        self.anim_queue.append("Skill")
+        self.queue_push("Skill")
 
     def basic_attack(self, target):
         # TauntBasic 애니를 3프레임째에 타격하는 근접 공격

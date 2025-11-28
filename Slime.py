@@ -18,12 +18,16 @@ class Slime(Enemy):
         self.add_anim("Skill",  scale=3, fps=10, loop=True)
 
     def basic_attack(self):
-        target = self.select_target()
-        if target is None:
-            return
-
-        print(f"{self.job}이(가) 기본 공격! → {target.job}에게 {self.power} 피해!")
-        target.take_damage(self.power)
+        target1 = random.choice(Field.allies_alive())
+        super().basic_attack(
+            target=target1,
+            anim="Basic",
+            hit_frame=5,
+            damage=self.power,
+            move_in=True,
+            move_back=True,
+            is_enemy=True
+        )
 
     def skill(self):
         """슬라임 난사: 랜덤 2명에게 35 데미지"""
