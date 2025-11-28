@@ -278,12 +278,11 @@ class Character:
 
         # 🔥 Hurt 애니 강제 재생 (연속 재생도 허용)
         if "Hurt" in self.animations:
-            # 현재 큐 무시하고 Hurt 재생을 queue 맨 앞에 삽입
-            self.anim_queue.insert(0, ("Hurt", 0.25))
+            self.queue_push("Hurt")
 
-            # 현재 애니가 Hurt가 아니면 Hurt로 전환
+        if self.current_anim == "Hurt":
             self.animations["Hurt"].reset()
-            self.current_anim = "Hurt"
+
 
 
 

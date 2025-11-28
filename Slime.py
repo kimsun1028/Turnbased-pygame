@@ -13,7 +13,7 @@ class Slime(Enemy):
         self.add_anim("Idle",  scale=3, fps=8,  loop=True)
         self.add_anim("Walk",  scale=3, fps=10, loop=True)
         self.add_anim("Basic", scale=3, fps=10, loop=False)
-        self.add_anim("Hurt",  scale=3, fps=12, loop=False, duration = 0.05)
+        self.add_anim("Hurt",  scale=3, fps=12, loop=False, duration = 0.3)
         self.add_anim("Death", scale=3, fps=12, loop=False)
         self.add_anim("Skill",  scale=3, fps=10, loop=True)
 
