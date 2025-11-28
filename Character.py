@@ -1,6 +1,7 @@
 import Field
 import Animation
 import  random
+import pygame
 class Character:
     def __init__(self, power=0, max_hp=0, job="", job_eng="", skill_cost=0, skill_name=""):
         # 기본 스탯
@@ -11,6 +12,7 @@ class Character:
         self.job = job
         self.job_eng = job_eng
         self.skill_name = skill_name
+        self.facing_right = True
 
         # 위치 정보
         self.position = (0, 0)
@@ -221,6 +223,8 @@ class Character:
     # ---------------------------------------------------------
     def draw(self, screen):
         frame = self.animations[self.current_anim].frames[self.animations[self.current_anim].current_frame]
+        if not self.facing_right:
+            frame = pygame.transform.flip(frame, True, False)
         w, h = frame.get_size()
         screen.blit(frame, (self.position[0] - w//2, self.position[1] - h//2))
 

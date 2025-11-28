@@ -7,6 +7,8 @@ class Enemy(Character):
     def __init__(self, name: str, hp: int, power: int):
         # Enemy도 Character를 그대로 상속하므로 super() 사용
         super().__init__(power=power, max_hp=hp, job=name)
+        self.facing_right = False  # 플레이어를 향하도록 설정
+
 
     def select_target(self):
         """도발 여부를 고려하여 공격할 아군을 선택"""
