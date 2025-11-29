@@ -195,14 +195,24 @@ class Character:
 
 
                 if target is None or not target.is_alive:
-                    from Field import enemies_alive
-                    alive = enemies_alive()
+                    # 대상이 죽었거나 None인 경우, 공격자(source)를 확인하여
+                    # 적절한 반대편 리스트에서 재타겟팅을 시도한다.
+                    source = ev.get("source")
+                    import Field as _F
 
-                    if alive:
-                        new_target = random.choice(alive)
-                        new_target.take_damage(damage)
-                    # 적 전멸 → Skill 중단하고 Idle 복귀
+                    if source is not None and source in _F.enemies:
+                        candidates = _F.allies_alive()
                     else:
+                        candidates = _F.enemies_alive()
+
+                    # 후보에서 소스 자신은 제외
+                    candidates = [c for c in candidates if c is not source]
+
+                    if candidates:
+                        new_target = random.choice(candidates)
+                        new_target.take_damage(damage)
+                    else:
+                        # 교전 상대가 없으면 이 행동(스킬)을 종료하고 Idle로 전환
                         self.hit_events.remove(ev)
                         self.queue_clear()
                         self.queue_push("Idle", None)
@@ -237,15 +247,16 @@ class Character:
     # ---------------------------------------------------------
     # 타격 이벤트 예약
     # ---------------------------------------------------------
-    def hit_in(self, delay, target, damage):
+    def hit_in(self, delay, target, damage, source=None):
         """
         delay초 뒤에 target.take_damage(damage)를 실행하도록 예약
         """
         self.hit_events.append(
-            {
+                {
                 "time": delay,
                 "target": target,
                 "damage": damage,
+                "source": source,
             }
         )
 
@@ -256,7 +267,7 @@ class Character:
         """
         anim = self.animations[anim_name]
         delay = frame_index * anim.time_per_frame
-        self.hit_in(delay, target, damage)
+        self.hit_in(delay, target, damage, source=self)
 
     # ---------------------------------------------------------
     # 전투 관련 (자식 클래스에서 오버라이드)
