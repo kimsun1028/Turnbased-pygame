@@ -6,7 +6,7 @@ from Enemy import Enemy
 
 class Slime(Enemy):
     def __init__(self, name: str):
-        super().__init__(name=name, hp=150, power=40)
+        super().__init__(name=name, hp=150, power=30)
         self.job = "슬라임"
         self.job_eng = "Slime"
         self.set_position(0,0)
@@ -15,12 +15,15 @@ class Slime(Enemy):
         self.add_anim("Basic", scale=3, fps=10, loop=False)
         self.add_anim("Hurt",  scale=3, fps=12, loop=False, duration = 0.3)
         self.add_anim("Death", scale=3, fps=12, loop=False)
-        self.add_anim("Skill",  scale=3, fps=10, loop=False)
+        self.add_anim("Skill",  scale=3, fps=10, loop=False, duration = 0.7)
 
     def basic_attack(self):
-        target1 = random.choice(Field.allies_alive())
+        target = self.select_target()
+        if target is None:
+            return
+
         super().basic_attack(
-            target=target1,
+            target=target,
             anim="Basic",
             hit_frame=5,
             damage=self.power,
@@ -30,43 +33,29 @@ class Slime(Enemy):
         )
 
     def skill(self):
-        damage = (3 * self.power) // 2
-        self.queue_clear()
-        x,y = self.position
-        target1 = random.choice(Field.allies_alive())
-        self.move_to((target1.position[0] + 100 , target1.position[1]), duration = 0.25)
-        self.queue_push("Skill", None)
-        if target1 is not None:
-            # schedule first hit at the correct time after the initial move
-            anim = self.animations.get("Skill")
-            if anim:
-                tpf = getattr(anim, 'time_per_frame', 0.0)
-                duration = getattr(anim, 'duration', 0.0)
-            else:
-                tpf = 0.0
-                duration = 0.0
+        """
+    A 모드: 슬라임 스킬을 사용하면,
+    1) 슬라임 자신이 강한 공격을 먼저 하고
+    2) 이어서 살아있는 모든 슬라임이 순서대로 기본공격을 한다.
+    """
 
-            move_dur = 0.25
-            start1 = move_dur
-            hit_delay1 = start1 + 8 * tpf
-            self.hit_in(hit_delay1, target1, damage, source=self)
-        target2 = random.choice(Field.allies_alive())
-        self.move_to((target2.position[0] + 100 , target2.position[1]), duration = 0.25)
-        self.queue_push("Skill",None)
-        if target2 is not None:
-           # the second skill animation starts after first move + skill duration + second move
-           anim = self.animations.get("Skill")
-           if anim:
-               tpf = getattr(anim, 'time_per_frame', 0.0)
-               duration = getattr(anim, 'duration', 0.0)
-           else:
-               tpf = 0.0
-               duration = 0.0
+    # 먼저 스킬 자체 공격
+        target = self.select_target()
+        if not target:
+            return
 
-           move_dur = 0.25
-           start2 = move_dur + duration + move_dur
-           hit_delay2 = start2 + 8 * tpf
-           self.hit_in(hit_delay2, target2, damage, source=self)
-        self.move_to((x,y), duration = 0.25) 
+        # 스킬 이펙트(강하게 한 번 공격)
+        super().basic_attack(
+            target=target,
+            anim="Skill",
+            hit_frame=9,
+            damage=int(self.power * 2),   # 스킬 데미지 (원하면 조절)
+            move_in=True,
+            move_back=True,
+            is_enemy=True
+        )
+
         
+
+
 

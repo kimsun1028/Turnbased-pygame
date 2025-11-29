@@ -6,14 +6,37 @@ from Animation import SpriteAnimator
 class Priest(Character):
     def __init__(self):
         super().__init__(
-            power=20,
-            max_hp=200,
+            power=30,
+            max_hp=100,
             job="프리스트",
             job_eng="Priest",
             skill_cost=1,
             skill_name="힐"   # 이전의 "힐 or 딜 선택" 구조를 버림
         )
 
+    def basic_attack(self, target):
+        Field.skill_point += 1
+        # Priest 평타 애니메이션
+        self.queue_clear()
+        self.queue_push("Skill", None)
+
+        
+        # 🔥 딜 이펙트 추가
+        attack_anim = SpriteAnimator(
+            "animation/Priest/Priest-Attack_Effect.png",
+            scale=2.0,
+            loop=False,
+            duration=0.6
+        )
+        self.hit_on_frame("Basic", 3, target, self.power)
+        tx, ty = target.position
+        Field.effects.add(
+            StaticEffect(attack_anim, (tx-100, ty-100), duration=0.6)
+        )
+
+ 
+    
+            
     def skill(self, idx):
         """
         스킬: 힐

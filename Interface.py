@@ -10,16 +10,21 @@ def auto_layout(positions_x, start_y, gap, objects):
         obj.set_position(x, y)
 
 
-def show_status(screen, character, offset_x=25, offset_y=120):
+def show_status(screen, character, index=None, offset_x=25, offset_y=120):
     font = pygame.font.SysFont("malgungothic", 12)
 
     x, y = character.position
 
-    text = f"{character.job}  HP:{character.current_hp}/{character.max_hp}  PW:{character.power}"
+    # 번호 prefix 추가
+    if index is None:
+        prefix = ""
+    else:
+        prefix = f"({index}) "
+
+    text = f"{prefix}{character.job}  HP:{character.current_hp}/{character.max_hp}  PW:{character.power}"
     surface = font.render(text, True, (255, 255, 255))
 
-    # 캐릭터 머리 위에 출력하도록 offset 적용
-    screen.blit(surface, (x + offset_x, y + offset_y))
+    screen.blit(surface, (x + offset_x-100, y + offset_y-100))
 
 
 def draw_top_hud(screen):

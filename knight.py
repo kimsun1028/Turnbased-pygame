@@ -4,7 +4,7 @@ from Character import Character
 class Knight(Character):
     def __init__(self):
         super().__init__(power=40, max_hp=150, job="나이트", job_eng="Knight",
-                         skill_cost=2, skill_name="도발")
+                         skill_cost=1, skill_name="도발")
 
 
     def take_damage(self, damage: int):

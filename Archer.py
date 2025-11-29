@@ -73,7 +73,7 @@ class Archer(Character):
                 
                 target = random.choice(enemies_alive)
 
-            self.hit_on_frame(anim, hit_start_frame, target,  damage_per_hit*3)
+            self.hit_on_frame(anim, hit_start_frame, target,  damage_per_hit)
             hit_start_frame += 6
             
 

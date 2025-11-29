@@ -4,130 +4,361 @@ import Field
 import Interface
 
 
+def _is_animating():
+    """아군/적 중 애니메이션 큐나 타격 이벤트가 남아 있으면 True"""
+    for c in Field.allies + Field.enemies:
+        if getattr(c, "anim_queue", None):
+            if c.anim_queue:
+                return True
+        if getattr(c, "hit_events", None):
+            if c.hit_events:
+                return True
+    return False
+
+
+def _draw_text_lines(screen, font, lines, x, y):
+    for i, line in enumerate(lines):
+        surf = font.render(line, True, (255, 255, 255))
+        screen.blit(surf, (x, y + i * 28))
+
+
 def first_floor(screen):
     clock = pygame.time.Clock()
-    run = True
+    running = True
 
-    enemy_positions = [(900, 150), (1000, 300), (900, 450)]
-    for enemy,pos in zip(Field.enemies, enemy_positions):
-        enemy.set_position(pos[0], pos[1])
-    
-    while run:
+    # ============================
+    # 1) 포지션 배치
+    # ============================
+    ally_positions = [(300, 200), (300, 320), (300, 440)]
+    for ally, pos in zip(Field.allies, ally_positions):
+        ally.set_position(*pos)
+
+    enemy_positions = [(900, 200), (900, 320), (900, 440)]
+    for enemy, pos in zip(Field.enemies, enemy_positions):
+        enemy.set_position(*pos)
+
+    # ============================
+    # 2) 고정 번호 부여
+    # ============================
+    for i, ch in enumerate(Field.allies):
+        ch.fixed_index = i + 1
+
+    for i, en in enumerate(Field.enemies):
+        en.fixed_index = i + 1
+
+    # ============================
+    # 3) 턴 변수
+    # ============================
+    Field.turn = 1
+    Field.start_turn()
+    action_left = 2
+    enemy_action_step = 0
+
+    state = "PLAYER_SELECT_ACTOR"
+    selected_char = None
+    selected_action = None
+    selected_targets = []
+
+    font = pygame.font.SysFont("malgungothic", 22)
+
+    # =====================================================
+    # 메인 루프
+    # =====================================================
+    while running:
+        dt = clock.tick(60) / 1000.0
+
+        # -----------------------------
+        # 이벤트 처리
+        # -----------------------------
         for event in pygame.event.get():
+
+            # 종료 버튼
             if event.type == pygame.QUIT:
-                run = False
-        
+                return False
 
-        screen.fill((30,30,30))
+            # ====== KEYDOWN 없으면 key 속성 없음 → 반드시 KEYDOWN 체크 필요 ======
+            if event.type != pygame.KEYDOWN:
+                continue
 
-        Interface.draw_top_hud(screen)
-        alive_allies = Field.allies_alive()
-        alive_enemies = Field.enemies_alive()
+            # ======================================
+            # 아군 선택 단계
+            # ======================================
+            if state == "PLAYER_SELECT_ACTOR":
 
-        Interface.auto_layout(positions_x=200, start_y=150, gap=150, objects=alive_allies)
-        Interface.auto_layout(positions_x=900, start_y=150, gap=150, objects=alive_enemies)
+                if event.key in (pygame.K_1, pygame.K_2, pygame.K_3):
+                    key_idx = event.key - pygame.K_1 + 1  # 1~3
 
-        for ally in Field.allies:
-            if ally.animator:
-                ally.animator.update()
-                ally.animator.draw(screen, ally.position)
-                Interface.show_status(screen, ally)
-        
-        for enemy in Field.enemies:
-            enemy.animator.update()
-            enemy.animator.draw(screen, enemy.position)
-            Interface.show_status(screen, enemy)
+                    # 고정 index 기반으로 아군 검색
+                    for ch in Field.allies:
+                        if ch.fixed_index == key_idx and ch.is_alive:
+                            selected_char = ch
+                            selected_targets = []
+                            selected_action = None
+                            state = "PLAYER_SELECT_ACTION"
+                            break
 
-        pygame.display.flip()
-        clock.tick(60)
+            # ======================================
+            # 행동 선택 단계
+            # ======================================
+            elif state == "PLAYER_SELECT_ACTION" and selected_char is not None:
 
-        """
-        turn += 1
-        Field.start_turn()
+                # ① 기본 공격
+                if event.key == pygame.K_1:
+                    selected_action = "BASIC"
+                    selected_targets = []
+                    state = "PLAYER_SELECT_TARGET"
 
-        # ───────────────────────
-        # 아군 행동 (2번)
-        # ───────────────────────
-        for action_idx in range(2):
-            print("\n" * 40)
-            print(f"(아군) 턴 {turn} - {action_idx+1}번째 행동")
-            Interface.show_status()
+                # ② 스킬
+                elif event.key == pygame.K_2:
+                    selected_action = "SKILL"
 
-            # 아군 선택
-            while True:
-                print("행동할 아군 번호를 선택하세요:")
-                try:
-                    idx = int(input().strip()) - 1
-                except ValueError:
-                    print("숫자를 입력하세요.")
-                    continue
-
-                allies_alive = Field.allies_alive()
-                if 0 <= idx < len(allies_alive):
-                    selected = allies_alive[idx]
-                    break
-                print("잘못된 번호입니다.")
-
-            # 행동 선택
-            while True:
-                print(f"기본공격 : 1 | {selected.skill_name} : 2")
-                act = input().strip()
-
-                if act == "1":
-                    selected.basic_attack()
-                    break
-                elif act == "2":
-                    if selected.can_use_skill():
-                        selected.skill()
-                        break
-                    else:
+                    if not selected_char.can_use_skill():
                         print("스킬 포인트 부족!")
+                        continue
+
+                    # 아처의 난사 → 대상 선택 없음
+                    if selected_char.job == "아처":
+                        selected_char.skill()
+                        action_left -= 1
+                        state = "WAIT_ANIMATION"
+
+                    # 프리스트 힐 → 대상 필요
+                    elif selected_char.job == "프리스트":
+                        selected_targets = []
+                        state = "PLAYER_SELECT_TARGET"
+
+                    # 나이트 도발 → 대상 없음
+                    else:
+                        selected_char.skill()
+                        action_left -= 1
+                        state = "WAIT_ANIMATION"
+
+                # ③ 취소
+                elif event.key == pygame.K_3:
+                    selected_char = None
+                    selected_targets = []
+                    selected_action = None
+                    state = "PLAYER_SELECT_ACTOR"
+
+            # ======================================
+            # 대상 선택 단계
+            # ======================================
+            elif state == "PLAYER_SELECT_TARGET" and selected_char is not None:
+
+                if event.key in (pygame.K_1, pygame.K_2, pygame.K_3):
+                    key_idx = event.key - pygame.K_1 + 1
+
+                    # -------------------------
+                    # 기본 공격
+                    # -------------------------
+                    if selected_action == "BASIC":
+
+                        # 아처: 대상 2명
+                        if selected_char.job == "아처":
+                            for enemy in Field.enemies:
+                                if enemy.fixed_index == key_idx and enemy.is_alive:
+                                    selected_targets.append(enemy)
+
+                                    if len(selected_targets) == 2:
+                                        selected_char.basic_attack(
+                                            selected_targets[0],
+                                            selected_targets[1]
+                                        )
+                                        action_left -= 1
+                                        state = "WAIT_ANIMATION"
+                                    break
+
+                        # 나이트, 프리스트: 대상 1명
+                        else:
+                            for enemy in Field.enemies:
+                                if enemy.fixed_index == key_idx and enemy.is_alive:
+                                    selected_char.basic_attack(enemy)
+                                    action_left -= 1
+                                    state = "WAIT_ANIMATION"
+                                    break
+
+                    # -------------------------
+                    # 프리스트 힐
+                    # -------------------------
+                    elif selected_action == "SKILL" and selected_char.job == "프리스트":
+
+                        for ally in Field.allies:
+                            if ally.fixed_index == key_idx and ally.is_alive:
+                                alive_list = Field.allies_alive()
+                                heal_idx = alive_list.index(ally)  # skill(heal_idx)
+                                selected_char.skill(heal_idx)
+                                action_left -= 1
+                                state = "WAIT_ANIMATION"
+                                break
+
+        # =====================================================
+        # 업데이트
+        # =====================================================
+        for a in Field.allies:
+            a.update(dt)
+        for e in Field.enemies:
+            e.update(dt)
+        Field.effects.update(dt)
+
+        # Death 애니 종료 처리
+        for ch in Field.allies + Field.enemies:
+            if not ch.is_alive and ch.current_anim == "Death":
+                anim = ch.animations.get("Death")
+                if anim and anim.finished:
+                    ch.anim_queue.clear()
+
+        # =====================================================
+        # 플레이어 WAIT
+        # =====================================================
+        if state == "WAIT_ANIMATION":
+            if not _is_animating():
+
+                if not Field.enemies_alive():
+                    pygame.time.delay(800)
+                    return True
+
+                if not Field.allies_alive():
+                    pygame.time.delay(800)
+                    return False
+
+                if action_left > 0:
+                    selected_char = None
+                    selected_action = None
+                    selected_targets = []
+                    state = "PLAYER_SELECT_ACTOR"
                 else:
-                    print("1 또는 2를 입력하세요.")
+                    enemy_action_step = 0
+                    state = "ENEMY_TURN"
 
-            Interface.pause()
+        # =====================================================
+        # 적 턴
+        # =====================================================
+        if state == "ENEMY_TURN":
 
-            # 적 전멸 체크
-            if not Field.enemies_alive():
-                print("던전 1층 클리어!")
+            enemies_alive = Field.enemies_alive()
+            if not enemies_alive:
+                pygame.time.delay(800)
                 return True
 
-        # ───────────────────────
-        # 적 공격 1
-        # ───────────────────────
-        print("\n" * 40)
-        print(f"(적) 턴 {turn} - 1번째 행동")
-        Interface.show_status()
+            attacker = random.choice(enemies_alive)
 
-        enemies_alive = Field.enemies_alive()
-        if enemies_alive:
-            e1 = random.choice(enemies_alive)
-            print("적이 기본 공격을 시전합니다!")
-            Interface.pause()
-            e1.basic_attack()
-            Interface.pause()
+            # Basic
+            if enemy_action_step == 0:
+                try:
+                    attacker.basic_attack()
+                except:
+                    allies_alive = Field.allies_alive()
+                    if allies_alive:
+                        attacker.basic_attack(allies_alive[0])
+                state = "ENEMY_WAIT"
 
-        # 아군 전멸 체크
-        if not Field.allies_alive():
-            print("던전 1층 실패!")
+            # Skill
+            elif enemy_action_step == 1:
+                try:
+                    attacker.skill()
+                except:
+                    attacker.skill()
+                state = "ENEMY_WAIT"
+
+        # =====================================================
+        # 적 WAIT
+        # =====================================================
+        if state == "ENEMY_WAIT":
+            if not _is_animating():
+
+                if not Field.allies_alive():
+                    pygame.time.delay(800)
+                    return False
+                if not Field.enemies_alive():
+                    pygame.time.delay(800)
+                    return True
+
+                enemy_action_step += 1
+                if enemy_action_step >= 2:
+                    Field.turn += 1
+                    Field.start_turn()
+                    action_left = 2
+                    selected_char = None
+                    selected_action = None
+                    selected_targets = []
+                    state = "PLAYER_SELECT_ACTOR"
+                else:
+                    state = "ENEMY_TURN"
+
+        # ==================================================
+        # 렌더링
+        # ==================================================
+        screen.fill((30, 30, 30))
+
+        Interface.draw_top_hud(screen)
+
+        def should_draw(ch):
+            if ch.is_alive:
+                return True
+            if ch.current_anim == "Death":
+                return True
+            if ch.anim_queue and ch.anim_queue[0][0] == "Death":
+                return True
             return False
 
-        # ───────────────────────
-        # 적 공격 2 (스킬)
-        # ───────────────────────
-        print("\n" * 40)
-        print(f"(적) 턴 {turn} - 2번째 행동")
-        Interface.show_status()
+        # 아군 출력
+        for a in Field.allies:
+            if should_draw(a):
+                a.draw(screen)
+                if a.is_alive:
+                    Interface.show_status(screen, a, index=a.fixed_index)
 
-        enemies_alive = Field.enemies_alive()
-        if enemies_alive:
-            e2 = random.choice(enemies_alive)
-            print("적이 스킬을 사용합니다!")
-            Interface.pause()
-            e2.skill()
-            Interface.pause()
+        # 적 출력
+        for e in Field.enemies:
+            if should_draw(e):
+                e.draw(screen)
+                if e.is_alive:
+                    Interface.show_status(screen, e, index=e.fixed_index)
 
-        if not Field.allies_alive():
-            print("던전 1층 실패!")
-            return False
-        """
+        # 이펙트 출력
+        Field.effects.draw(screen)
+
+        # -----------------------------
+        # 안내 텍스트
+        # -----------------------------
+        guide_lines = []
+
+        if state == "PLAYER_SELECT_ACTOR":
+            guide_lines.append(f"[플레이어 턴] 행동 남은 횟수: {action_left}/2")
+            guide_lines.append("아군 선택: 1, 2, 3")
+
+        elif state == "PLAYER_SELECT_ACTION" and selected_char is not None:
+            guide_lines.append(f"선택된 아군: {selected_char.job}")
+
+            # Knight 기본공격 강화 UI
+            if selected_char.job == "나이트" and Field.is_taunt():
+                guide_lines.append("1: 기본 공격(강화)")
+            else:
+                guide_lines.append("1: 기본 공격")
+
+            guide_lines.append(f"2: {selected_char.skill_name} (스킬)")
+            guide_lines.append("3: 취소")
+
+        elif state == "PLAYER_SELECT_TARGET" and selected_char is not None:
+            if selected_action == "BASIC":
+                if selected_char.job == "아처":
+                    guide_lines.append("공격할 적 2명 선택")
+                    guide_lines.append(f"현재 선택 {len(selected_targets)}/2")
+                else:
+                    guide_lines.append("공격할 적 선택: 1,2,3")
+
+            elif selected_action == "SKILL" and selected_char.job == "프리스트":
+                guide_lines.append("힐할 아군 선택: 1,2,3")
+
+        elif state in ("WAIT_ANIMATION", "ENEMY_WAIT"):
+            guide_lines.append("진행 중...")
+
+        elif state == "ENEMY_TURN":
+            guide_lines.append("[적 턴 진행 중]")
+
+        if guide_lines:
+            _draw_text_lines(screen, font, guide_lines, 40, 600)
+
+        pygame.display.flip()
+
+    return False
