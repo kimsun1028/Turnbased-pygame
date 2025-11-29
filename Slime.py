@@ -30,37 +30,24 @@ class Slime(Enemy):
         )
 
     def skill(self):
-        """슬라임 난사: 랜덤 2명에게 35 데미지"""
-        allies_alive = Field.allies_alive()
+        target1 = random.choice(Field.allies_alive())
+        super().basic_attack(
+            target=target1,
+            anim="Skill",
+            hit_frame=9,
+            damage=self.power,
+            move_in=True,
+            move_back=True,
+            is_enemy=True
+        )
+        target2 = random.choice(Field.allies_alive())
+        super().basic_attack(
+            target=target2,
+            anim="Skill",
+            hit_frame=9,
+            damage=self.power,
+            move_in=True,
+            move_back=True,
+            is_enemy=True
+        )
 
-        # 대상이 1명일 때 처리
-        if len(allies_alive) < 2:
-            target = self.select_target()
-            if target:
-                print(f"{self.job}이(가) 난사! 대상이 1명뿐!")
-                target.take_damage(self.power)
-            return
-
-        # 도발 상태일 때
-        if Field.is_taunt():
-            target = self.select_target()
-            print(f"{self.job}이(가) 난사! (도발 중)")
-            target.take_damage(self.power)
-
-            if target in Field.allies_alive():
-                target.take_damage(self.power)
-            else:
-                extra = self.select_target()
-                if extra:
-                    extra.take_damage(self.power)
-            return
-
-        # 일반 상황: 서로 다른 2명
-        t1 = self.select_target()
-        t2 = None
-        while t2 is None or t2 is t1:
-            t2 = self.select_target()
-
-        print(f"{self.job}이(가) 난사! {t1.job}, {t2.job}에게 피해!")
-        t1.take_damage(self.power)
-        t2.take_damage(self.power)

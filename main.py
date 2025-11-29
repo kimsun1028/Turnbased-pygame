@@ -118,6 +118,10 @@ def animation_test_loop(screen):
                     test_enemy = Field.enemies_alive()[0]
                     test_enemy.basic_attack()
 
+                elif event.key == pygame.K_k:
+                    test_enemy = Field.enemies_alive()[0]
+                    test_enemy.skill()
+
                 elif event.key == pygame.K_RETURN:
                     return
 
