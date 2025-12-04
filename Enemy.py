@@ -1,7 +1,7 @@
 import random
 import Field
 from Character import Character
-from Knight import Knight   
+from knight import Knight   
 
 class Enemy(Character):
     def __init__(self, name: str, hp: int, power: int):

@@ -1,6 +1,6 @@
 import pygame
 import Field
-from Knight import Knight
+from knight import Knight
 from Archer import Archer
 from Priest import Priest
 
