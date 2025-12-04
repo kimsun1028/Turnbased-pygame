@@ -16,6 +16,8 @@ class Archer(Character):
             skill_name="난사(2)",
         )
 
+        self.basic_desc = "지정한 두 명의 적에게 연속 사격으로 POWER 100% 만큼의 피해를 입힙니다."
+        self.skill_desc = "무작위 적에게 POWER 40%의 화살을 10발 난사하여 피해를 입힙니다."
     def basic_attack(self, target1, target2=None):
 
         self.queue_clear()

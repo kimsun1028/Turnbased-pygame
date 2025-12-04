@@ -5,6 +5,10 @@ class Knight(Character):
     def __init__(self):
         super().__init__(power=40, max_hp=150, job="나이트", job_eng="Knight",
                          skill_cost=1, skill_name="도발")
+        
+        self.basic_desc = "지정한 적에게 공격해 POWER의 100% 만큼 피해를 입힙니다."
+        self.sbasic_desc = "지정한 적에게 공격해 POWER의 100% + 잃은 체력의 33%만큼 피해를 입힙니다."
+        self.skill_desc = "2턴 동안 적을 도발하여 적의 공격을 유도합니다. 도발 중 기본공격이 강화됩니다."
 
 
     def take_damage(self, damage: int):

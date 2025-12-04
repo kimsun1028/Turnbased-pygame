@@ -348,11 +348,11 @@ def first_floor(screen):
             guide_lines.append(f"선택된 아군: {selected_char.job}")
 
             if selected_char.job == "나이트" and Field.is_taunt():
-                guide_lines.append("1: 기본 공격(강화)")
+                guide_lines.append(f"1: 기본 공격(강화) | {selected_char.sbasic_desc}")
             else:
-                guide_lines.append("1: 기본 공격")
+                guide_lines.append(f"1: 기본 공격 | {selected_char.basic_desc}")
 
-            guide_lines.append(f"2: {selected_char.skill_name} (스킬)")
+            guide_lines.append(f"2: {selected_char.skill_name}(스킬) | {selected_char.skill_desc}")
             guide_lines.append("3: 취소")
 
         elif state == "PLAYER_SELECT_TARGET" and selected_char is not None:
