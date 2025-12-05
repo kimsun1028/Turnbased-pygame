@@ -23,12 +23,12 @@ def _draw_text_lines(screen, font, lines, x, y):
         screen.blit(surf, (x, y + i * 28))
 
 
-def first_floor(screen,start_pos = (350,300),gap = 100,gap2 = 600):
+def floor(screen, bg_path, start_pos = (350,300),gap = 100,gap2 = 600):
     clock = pygame.time.Clock()
     running = True
     
-    bg_first = pygame.image.load("image/first_floor(2).jpg").convert()
-    bg_first = pygame.transform.scale(bg_first, (1280, 720))
+    bg_image = pygame.image.load(bg_path).convert()
+    bg_image = pygame.transform.scale(bg_image, (1280, 720))
 
     # ============================
     # 1) 포지션 배치
@@ -52,6 +52,7 @@ def first_floor(screen,start_pos = (350,300),gap = 100,gap2 = 600):
     # ============================
     # 3) 턴 변수
     # ============================
+    Field.skill_point = 3
     Field.turn = 1
     Field.start_turn()
     action_left = 2
@@ -63,7 +64,7 @@ def first_floor(screen,start_pos = (350,300),gap = 100,gap2 = 600):
     selected_action = None
     selected_targets = []
 
-    font = pygame.font.SysFont("malgungothic", 22)
+    font = pygame.font.SysFont("malgungothic", 20)
 
     # =====================================================
     # 메인 루프
@@ -278,10 +279,10 @@ def first_floor(screen,start_pos = (350,300),gap = 100,gap2 = 600):
                 state = "ENEMY_WAIT"
 
             elif enemy_action_step == 1:
-                try:
-                    attacker.skill()
-                except:
-                    attacker.skill()
+                for enemy in enemies_alive:
+                    if enemy.isBoss == True:
+                        attacker = enemy
+                attacker.skill()
                 state = "ENEMY_WAIT"
 
         # ============================
@@ -314,7 +315,7 @@ def first_floor(screen,start_pos = (350,300),gap = 100,gap2 = 600):
         # ==================================================
         # 렌더링
         # ==================================================
-        screen.blit(bg_first, (0, 0))
+        screen.blit(bg_image, (0, 0))
         Interface.draw_top_hud(screen)
 
         def should_draw(ch):

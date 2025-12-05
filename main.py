@@ -8,9 +8,9 @@ import Dungeon  # ← Dungeon.py 임포트
 
 def setup_first_floor():
     Field.enemies = [
-        Orc("보스"),
-        Orc_rider("보스"),
-        Orc("보스"),
+        Slime("슬라임"),
+        Slime("슬라임"),
+        Slime("슬라임")
     ]
 
 def main():
@@ -25,8 +25,8 @@ def main():
     party_scene.run()
 
     # 🔥 이제 애니메이션 테스트 대신 실제 던전 전투 실행
-    Dungeon.first_floor(screen)
-
+    Dungeon.floor(screen,"image/First_floor.jpg")
+    Dungeon.floor()
     pygame.quit()
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ class Enemy(Character):
         # Enemy도 Character를 그대로 상속하므로 super() 사용
         super().__init__(power=power, max_hp=hp, job=name)
         self.facing_right = False  # 플레이어를 향하도록 설정
+        self.isBoss = False
 
 
     def select_target(self):

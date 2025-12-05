@@ -17,7 +17,7 @@ class PartySelect:
 
         self.selected = []
         self.preview_chars = []
-        self.bg = pygame.image.load("image/Party_select (2).jpg").convert()
+        self.bg = pygame.image.load("image/Party_select.jpg").convert()
         self.bg = pygame.transform.scale(self.bg, (1280,720))
 
     def register_anims(self, character):

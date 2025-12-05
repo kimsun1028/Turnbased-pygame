@@ -5,11 +5,11 @@ from Slime import Slime   # 필요 시 사용 가능
 
 
 class Orc_rider(Enemy):
-    def __init__(self, name="오크라이더"):
+    def __init__(self, name="오크라이더", isBoss = False):
         super().__init__(name=name, hp=250, power=40)
         self.job = "오크라이더"
         self.job_eng = "Orc_rider"
-        
+        self.isBoss = isBoss
 
         self.set_position(0, 0)
 
@@ -43,28 +43,33 @@ class Orc_rider(Enemy):
         """
         
         anim = "Basic"
-        hit_frame = 7
+        hit_frame = 8
         dmg = self.power
         allies = Field.allies_alive()
+        if not allies:
+            return
         self.queue_clear()
         ox, oy = self.position
 
-        if not allies:
-            return
-        maintarget = self.select_target()
-        if not Field.is_taunt():
-            maintarget = allies[len(allies)//2]
+        if Field.is_taunt():
+            maintarget = self.select_target()
+        else:
+            alive_sorted = sorted(allies, key=lambda c: c.fixed_index)
+            mid = len(alive_sorted) // 2
+            maintarget = alive_sorted[mid]
+
         tx, ty = maintarget.position
         tx = tx + 100
         self.move_to((tx,ty), duration = 0.5)
 
+        alive_sorted = sorted(Field.allies_alive(), key=lambda c: c.fixed_index)
+        idx = alive_sorted.index(maintarget)
+
         targets = [maintarget]
-        for idx,ally in enumerate(allies):
-            if ally is maintarget:
-                if idx - 1 > -1:
-                    targets.append(allies[idx-1])
-                if idx + 1 < len(allies):
-                    targets.append(allies[idx+1])
+        if idx - 1 >= 0:
+            targets.append(alive_sorted[idx-1])
+        if idx + 1 < len(alive_sorted):
+            targets.append(alive_sorted[idx+1])
         if maintarget is None:
             return
 

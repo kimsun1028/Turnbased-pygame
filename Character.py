@@ -14,6 +14,7 @@ class Character:
         self.skill_name = skill_name
         self.facing_right = True
 
+
         self.basic_desc = ""
         self.skill_desc = ""
         # 위치 정보
