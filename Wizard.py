@@ -13,10 +13,11 @@ class Wizard(Character):
             skill_cost=2,
             skill_name="블리자드"  
         )
-        self.ult_remain = 3
 
+        self.ult_remain = 2
         self.basic_desc = "       | 지정한 적에게 피해를 입힙니다."
         self.skill_desc = f" | 얼음결정을 소환해 모든 적에게 피해를 입힙니다. (강화 남은 횟수 = {self.ult_remain})"
+        
 
     def basic_attack(self, target):
         Field.skill_point +=1
@@ -40,7 +41,7 @@ class Wizard(Character):
             "animation/Wizard/Wizard-Skill_Effect.png",
             scale=8.0,
             loop=False,
-            duration=1.5       )
+            duration=1.0       )
 
         Field.skill_point -= 2
         # Wizard 평타 애니메이션
@@ -50,7 +51,7 @@ class Wizard(Character):
         damage = self.power*3//4
         tx,ty = Field.enemies[1].position
         enemies_alive = Field.enemies_alive()
-        if self.ult_remain is not 0:
+        if self.ult_remain > 0:
             self.ult_remain -= 1
             Field.effects.add(StaticEffect(attack_anim, (tx-200, ty-200), duration=1.0))
             for target in enemies_alive:
@@ -60,8 +61,9 @@ class Wizard(Character):
             Field.effects.add(StaticEffect(ult_anim, (tx-400, ty-400), duration=1.0))
             for target in enemies_alive:
                 if target and target.is_alive:
-                    self.hit_on_frame("Skill", hit_frame*2, target, damage*2)
-            self.ult_remain += 3
+                    self.hit_on_frame("Skill", hit_frame+3, target, damage*2)
+            self.ult_remain += 2
+        self.skill_desc = f" | 얼음결정을 소환해 모든 적에게 피해를 입힙니다. (강화 남은 횟수 = {self.ult_remain})"
                     
         
 
