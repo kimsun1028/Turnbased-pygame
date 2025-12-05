@@ -14,8 +14,8 @@ class Priest(Character):
             skill_name="힐"  
         )
 
-        self.basic_desc = "지정한 적에게 POWER 100%의 피해를 입힙니다."
-        self.skill_desc = "지정한 아군에게 POWER 200%만큼 체력을 회복시키고 가장 체력이 적은 아군에게 POWER 100%만큼 회복시킵니다."
+        self.basic_desc = " | 지정한 적에게 피해를 입힙니다."
+        self.skill_desc = "   | 지정한 아군에게 체력을 회복시키고 잃은 체력이 많은 아군을 회복시킵니다."
 
     def basic_attack(self, target):
         Field.skill_point += 1
@@ -34,7 +34,7 @@ class Priest(Character):
         self.hit_on_frame("Basic", 3, target, self.power)
         tx, ty = target.position
         Field.effects.add(
-            StaticEffect(attack_anim, (tx-100, ty-100), duration=1.0)
+            StaticEffect(attack_anim, (tx-100, ty-100), duration=0.5)
         )
 
  

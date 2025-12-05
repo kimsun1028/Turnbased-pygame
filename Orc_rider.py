@@ -6,7 +6,7 @@ from Slime import Slime   # 필요 시 사용 가능
 
 class Orc_rider(Enemy):
     def __init__(self, name="오크라이더", isBoss = False):
-        super().__init__(name=name, hp=250, power=40)
+        super().__init__(name=name, hp=300, power=40)
         self.job = "오크라이더"
         self.job_eng = "Orc_rider"
         self.isBoss = isBoss
@@ -73,8 +73,6 @@ class Orc_rider(Enemy):
         if maintarget is None:
             return
 
-
-        # 기본 공격 애니 재생
         self.queue_push(anim, None)
         for target in targets:
             if target and target.is_alive:

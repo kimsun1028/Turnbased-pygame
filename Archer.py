@@ -8,7 +8,7 @@ from Character import Character
 class Archer(Character):
     def __init__(self):
         super().__init__(
-            power=40,
+            power=4000,
             max_hp=100,
             job="아처",
             job_eng="Archer",
@@ -16,8 +16,8 @@ class Archer(Character):
             skill_name="난사(2)",
         )
 
-        self.basic_desc = "지정한 두 명의 적에게 연속 사격으로 POWER 100% 만큼의 피해를 입힙니다."
-        self.skill_desc = "무작위 적에게 POWER 40%의 화살을 10발 난사하여 피해를 입힙니다."
+        self.basic_desc = "     | 지정한 두 명의 적에게 연속 사격으로 피해를 입힙니다."
+        self.skill_desc = " | 무작위 10명의 적에게 화살을 난사하여 피해를 입힙니다."
     def basic_attack(self, target1, target2=None):
 
         self.queue_clear()
@@ -77,24 +77,3 @@ class Archer(Character):
             self.hit_on_frame(anim, hit_start_frame, target,  damage_per_hit)
             hit_start_frame += 6
             
-
-    def add_arrow_effect(self, frame_index, target):
-        # 화살 애니메이션 로드
-        arrow_anim = SpriteAnimator(
-            "animation/Archer/Archer-Arrow.png",
-            scale=2.0,
-            loop=False,
-            duration=0.15
-        )
-
-        # 화살 출발 위치는 아처 중심
-        sx, sy = self.position
-
-        # 도착 위치는 타겟 중심 (offset으로 보정 가능)
-        tx, ty = target.position
-
-        # 호출 시점이 hit_on_frame보다 약간 빨라야 자연스럽다
-        self.hit_events.append({
-            "time": frame_index * self.animations["Basic"].time_per_frame - 0.05,
-            "spawn_arrow": (arrow_anim, (sx, sy), (tx, ty))
-        })
