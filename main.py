@@ -2,13 +2,15 @@ import pygame
 from PartySelect import PartySelect
 import Field
 from Slime import Slime
+from Orc_rider import Orc_rider
+from Orc import Orc
 import Dungeon  # ← Dungeon.py 임포트
 
 def setup_first_floor():
     Field.enemies = [
-        Slime("슬라임1"),
-        Slime("슬라임2"),
-        Slime("슬라임3"),
+        Orc("보스"),
+        Orc_rider("보스"),
+        Orc("보스"),
     ]
 
 def main():

@@ -4,6 +4,7 @@ import Field
 import Interface
 
 
+
 def _is_animating():
     """아군/적 중 애니메이션 큐나 타격 이벤트가 남아 있으면 True"""
     for c in Field.allies + Field.enemies:
@@ -22,18 +23,21 @@ def _draw_text_lines(screen, font, lines, x, y):
         screen.blit(surf, (x, y + i * 28))
 
 
-def first_floor(screen):
+def first_floor(screen,start_pos = (350,300),gap = 100,gap2 = 600):
     clock = pygame.time.Clock()
     running = True
+    
+    bg_first = pygame.image.load("image/first_floor(2).jpg").convert()
+    bg_first = pygame.transform.scale(bg_first, (1280, 720))
 
     # ============================
     # 1) 포지션 배치
     # ============================
-    ally_positions = [(300, 200), (300, 320), (300, 440)]
+    ally_positions = [(start_pos[0], start_pos[1] + i*gap) for i in range(3)]
     for ally, pos in zip(Field.allies, ally_positions):
         ally.set_position(*pos)
 
-    enemy_positions = [(900, 200), (900, 320), (900, 440)]
+    enemy_positions = [(start_pos[0] + gap2, start_pos[1] + i*gap) for i in range(3)]
     for enemy, pos in zip(Field.enemies, enemy_positions):
         enemy.set_position(*pos)
 
@@ -223,20 +227,21 @@ def first_floor(screen):
         # WAIT 상태 → 애니 끝나면 다음 단계
         # ============================
         if state == "WAIT_ANIMATION":
+
+            # 적 전멸 → 다음 층 이동 질문
+            if not Field.enemies_alive():
+                """
+                for ch in Field.allies + Field.enemies:
+                    ch.anim_queue.clear()
+                    ch.hit_events.clear()
+                    ch.current_anim = None
+                    """
+
+                state = "NEXT_FLOOR_QUERY"
+                next_floor_choice = None
+                continue
+
             if not _is_animating():
-
-                # 적 전멸 → 다음 층 이동 질문
-                if not Field.enemies_alive():
-                    for ch in Field.allies + Field.enemies:
-                        ch.anim_queue.clear()
-                        ch.hit_events.clear()
-                        ch.current_anim = None
-
-                    pygame.time.delay(500)
-                    state = "NEXT_FLOOR_QUERY"
-                    next_floor_choice = None
-                    continue
-
                 if not Field.allies_alive():
                     pygame.time.delay(800)
                     return False
@@ -309,7 +314,7 @@ def first_floor(screen):
         # ==================================================
         # 렌더링
         # ==================================================
-        screen.fill((30, 30, 30))
+        screen.blit(bg_first, (0, 0))
         Interface.draw_top_hud(screen)
 
         def should_draw(ch):
@@ -350,9 +355,9 @@ def first_floor(screen):
             if selected_char.job == "나이트" and Field.is_taunt():
                 guide_lines.append(f"1: 기본 공격(강화) | {selected_char.sbasic_desc}")
             else:
-                guide_lines.append(f"1: 기본 공격 | {selected_char.basic_desc}")
+                guide_lines.append(f"1: 기본 공격  | {selected_char.basic_desc}")
 
-            guide_lines.append(f"2: {selected_char.skill_name}(스킬) | {selected_char.skill_desc}")
+            guide_lines.append(f"2: {selected_char.skill_name}(스킬)  | {selected_char.skill_desc}")
             guide_lines.append("3: 취소")
 
         elif state == "PLAYER_SELECT_TARGET" and selected_char is not None:

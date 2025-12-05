@@ -53,7 +53,7 @@ class Character:
     # ---------------------------------------------------------
     # 애니메이션 추가
     # ---------------------------------------------------------
-    def add_anim(self, state, scale=2.0, fps=8, loop=True, duration = 0.5):
+    def add_anim(self, state, scale=2.5, fps=8, loop=True, duration = 0.5):
         """
         state: "Idle", "Walk", "Basic", "Skill", "Hurt", "Death" 등
         animation/{job_eng}/{job_eng}-{state}.png 를 스프라이트 시트로 사용

@@ -19,13 +19,13 @@ class Knight(Character):
     def skill(self):
         """도발 스킬"""
         # 도발 지속 2턴
-        Field.remain_taunt_turn = 2
+        Field.remain_taunt_turn += 2
 
         # 최대 체력 증가 (원본 C#: 도발 시 MaxHP 증가)
         self.max_hp = 200
 
-        # 회복 효과 +20
-        self.current_hp += 20
+        # 회복 효과 + 50
+        self.current_hp += 50
         if self.current_hp > self.max_hp:
             self.current_hp = self.max_hp
 

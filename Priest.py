@@ -15,13 +15,13 @@ class Priest(Character):
         )
 
         self.basic_desc = "지정한 적에게 POWER 100%의 피해를 입힙니다."
-        self.basic_desc = "지정한 아군에게 POWER 200%만큼 체력을 회복시키고 가장 체력이 적은 아군에게 POWER 100%만큼 회복시킵니다."
+        self.skill_desc = "지정한 아군에게 POWER 200%만큼 체력을 회복시키고 가장 체력이 적은 아군에게 POWER 100%만큼 회복시킵니다."
 
     def basic_attack(self, target):
         Field.skill_point += 1
         # Priest 평타 애니메이션
         self.queue_clear()
-        self.queue_push("Skill", duration = 1.0)
+        self.queue_push("Basic")
 
         
         # 🔥 딜 이펙트 추가
@@ -29,7 +29,7 @@ class Priest(Character):
             "animation/Priest/Priest-Attack_Effect.png",
             scale=2.0,
             loop=False,
-            duration=0.6
+            duration=0.5
         )
         self.hit_on_frame("Basic", 3, target, self.power)
         tx, ty = target.position

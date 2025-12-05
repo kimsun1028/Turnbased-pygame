@@ -1,12 +1,12 @@
-# Slime.py
+# Orc.py
 from Enemy import Enemy
 
 
-class Slime(Enemy):
+class Orc(Enemy):
     def __init__(self, name: str):
         super().__init__(name=name, hp=150, power=30)
-        self.job = "슬라임"
-        self.job_eng = "Slime"
+        self.job = "오크"
+        self.job_eng = "Orc"
         self.set_position(0,0)
         self.add_anim("Idle",   fps=8,  loop=True)
         self.add_anim("Walk",   fps=10, loop=False)
@@ -23,7 +23,7 @@ class Slime(Enemy):
         super().basic_attack(
             target=target,
             anim="Basic",
-            hit_frame=5,
+            hit_frame=4,
             damage=self.power,
             move_in=True,
             move_back=True,
@@ -31,13 +31,6 @@ class Slime(Enemy):
         )
 
     def skill(self):
-        """
-    A 모드: 슬라임 스킬을 사용하면,
-    1) 슬라임 자신이 강한 공격을 먼저 하고
-    2) 이어서 살아있는 모든 슬라임이 순서대로 기본공격을 한다.
-    """
-
-    # 먼저 스킬 자체 공격
         target = self.select_target()
         if not target:
             return
@@ -46,7 +39,7 @@ class Slime(Enemy):
         super().basic_attack(
             target=target,
             anim="Skill",
-            hit_frame=9,
+            hit_frame=4,
             damage=int(self.power * 2),   
             move_in=True,
             move_back=True,
