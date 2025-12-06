@@ -98,7 +98,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
     while running:
         dt = clock.tick(60) / 1000.0
 
-        # 아군 전멸 → 패배 상태 진입
+        # 아군 전멸 -> 패배 상태 진입
         if not Field.allies_alive() and state not in (
             "DEFEAT_QUERY",
             "QUIT_QUERY",

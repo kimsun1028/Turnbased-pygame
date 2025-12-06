@@ -20,7 +20,7 @@ class Enemy(Character):
         적이 공격할 아군을 선택.
         도발 상태일 경우 Knight만 우선 대상
         """
-        # 1) 도발 상태라면 → Knight만 공격 가능
+        # 1) 도발 상태라면 -> Knight만 공격 가능
         if Field.is_taunt():
             alive_knights = [c for c in Field.allies_alive() if isinstance(c, Knight)]
             if alive_knights:

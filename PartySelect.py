@@ -111,7 +111,7 @@ class PartySelect:
                                 return
 
                         elif event.key == pygame.K_ESCAPE:
-                            # 상세 화면 종료 → SELECT로 복귀
+                            # 상세 화면 종료 -> SELECT로 복귀
                             self.state = "SELECT"
                             self.current_pick = None
 

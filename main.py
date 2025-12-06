@@ -6,20 +6,35 @@ from Orc_rider import Orc_rider
 from Orc import Orc
 import Dungeon  # ← Dungeon.py 임포트
 
+
 def setup_first_floor():
+    """
+    1층에서 등장할 적들을 Field.enemies 리스트에 세팅합니다.
+    """
     Field.enemies = [
         Slime("슬라임"),
         Slime("슬라임"),
         Slime("슬라임")
     ]
+
+
 def setup_second_floor():
+    """
+    2층에서 등장할 적들을 Field.enemies 리스트에 세팅합니다.
+    보스(Orc_rider)는 isBoss=True 로 설정합니다.
+    """
     Field.enemies = [
         Orc("오크"),
-        Orc_rider("오크라이터(Boss)", isBoss = True),
+        Orc_rider("오크라이터(Boss)", isBoss=True),
         Orc("오크")
     ]
 
+
 def walk_to_next_floor(screen, bg_image):
+    """
+    1층과 2층 사이 전환 연출(아군 걷기 장면)을 재생합니다.
+    아군 캐릭터를 오른쪽으로 이동시키며 Walk 애니메이션을 재생합니다.
+    """
     clock = pygame.time.Clock()
 
     # 아군 걷기 모션
@@ -67,6 +82,10 @@ def walk_to_next_floor(screen, bg_image):
 
 
 def main():
+    """
+    게임의 전체 흐름을 담당하는 메인 루프입니다.
+    파티 선택 -> 1층 전투 -> 이동 연출 -> 2층 전투 순서로 진행합니다.
+    """
     pygame.init()
     screen = pygame.display.set_mode((1280, 720))
     pygame.display.set_caption("Turn-Based PYGAME")
@@ -91,6 +110,7 @@ def main():
                 return
             elif result == "NEXT":
                 break   # 1층을 깼으니 2층으로 이동
+
         bg_image = pygame.image.load("image/First_floor.jpg").convert()
         bg_image = pygame.transform.scale(bg_image, (1280, 720))
 
@@ -112,7 +132,7 @@ def main():
                     screen,
                     "image/Second_floor.jpg",
                     start_pos=(350, 250),
-                    last_floor=True   # 🔥 마지막 층 표시 중요
+                    last_floor=True   #마지막 층 표시 
                 )
 
                 if result2 == "RETRY":
@@ -124,9 +144,7 @@ def main():
                     return
 
                 # 마지막 층에서는 NEXT가 나오지 않음.
-                # result2 == "NEXT" 코드는 필요 없음.
 
 
 if __name__ == "__main__":
     main()
-

@@ -114,7 +114,7 @@ class Character:
         현재 캐릭터가 어떤 행동을 히야하는지 결정
         이동 명령도 처리함
         """
-        # 큐가 비어 있음 → Idle 처리 후 종료
+        # 큐가 비어 있음 -> Idle 처리 후 종료
         if not self.anim_queue:
             if (
                 "Idle" in self.animations
@@ -170,7 +170,7 @@ class Character:
                 self.moving = False
                 self.anim_queue.pop(0)
 
-            return   # 이동 → 종료
+            return   # 이동 -> 종료
 
         # -------------------------
         # 2) 일반 애니메이션 처리
@@ -191,7 +191,7 @@ class Character:
             if self.queue_time >= duration:
                 self.anim_queue.pop(0)
         else:
-            # duration이 None → Animator 기준으로 끝날 때 pop
+            # duration이 None -> Animator 기준으로 끝날 때 pop
             if anim.finished:
                 self.anim_queue.pop(0)
 
