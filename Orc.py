@@ -1,6 +1,4 @@
-# Orc.py
 from Enemy import Enemy
-
 
 class Orc(Enemy):
     def __init__(self, name: str):

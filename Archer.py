@@ -1,6 +1,4 @@
-import time
 import random
-from Animation import SpriteAnimator
 import Field
 from Character import Character
 

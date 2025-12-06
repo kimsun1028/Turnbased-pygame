@@ -1,8 +1,14 @@
+
 import Field
 import Animation
 import  random
 import pygame
 class Character:
+    """
+    캐릭터.py의 캐릭터 클래스는 게임 내 모든 캐릭터(적,아군)의 부모 클래스입니다.
+    애니메이션 관련 로직, 게임 내 행동 로직 등이 구현되어 있습니다.
+    """
+    # 생성자 
     def __init__(self, power=0, max_hp=0, job="", job_eng="", skill_cost=0, skill_name=""):
         # 기본 스탯
         self.power = power
@@ -12,6 +18,8 @@ class Character:
         self.job = job
         self.job_eng = job_eng
         self.skill_name = skill_name
+        
+        # 오른쪽을 주시하는지
         self.facing_right = True
 
 

@@ -1,7 +1,5 @@
-import random
 import Field
 from Enemy import Enemy
-from Slime import Slime   # 필요 시 사용 가능
 
 
 class Orc_rider(Enemy):
