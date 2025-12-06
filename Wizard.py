@@ -4,6 +4,10 @@ from Effects import StaticEffect
 from Animation import SpriteAnimator
 
 class Wizard(Character):
+    """
+    위자드 클래스입니다. 판타지 RPG 직업에서 가장 전형적인 마법사를 구현하였습니다.
+    캐릭터.py의 자식 클래스로 기본공격과 스킬을 추가로 구현하였습니다.
+    """
     def __init__(self):
         super().__init__(
             power=60,
@@ -18,8 +22,13 @@ class Wizard(Character):
         self.basic_desc = "       | 지정한 적에게 피해를 입힙니다."
         self.skill_desc = f" | 얼음결정을 소환해 모든 적에게 피해를 입힙니다. (강화 남은 횟수 = {self.ult_remain})"
         
-
+    # -----------------------------
+    # 기본 공격 메서드
+    # -----------------------------
     def basic_attack(self, target):
+        """
+        기본 기본 공격 메서드
+        """
         Field.skill_point +=1
         super().basic_attack(
             target=target,
@@ -29,14 +38,24 @@ class Wizard(Character):
             move_in=True,
             move_back=True            
             )
-        
+    
+    # -----------------------------
+    # 스킬 메서드
+    # -----------------------------
     def skill(self, target=None):
-        # 🔥 딜 이펙트 추가
+        """
+        블리자드 이펙트를 적 중앙에 출력
+        모든 적이 take_damage
+        3번중 한번 더욱 커진 이펙트 출력
+        """
+        # 기본 스킬 이펙트
         attack_anim = SpriteAnimator(
             "animation/Wizard/Wizard-Skill_Effect.png",
             scale=4.0,
             loop=False,
             duration=0.7       )
+        
+        # 3번중 한번 쓰는 궁극기 이펙트 (스케일만 커짐)
         ult_anim =  SpriteAnimator(
             "animation/Wizard/Wizard-Skill_Effect.png",
             scale=8.0,

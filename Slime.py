@@ -3,6 +3,9 @@ from Enemy import Enemy
 
 
 class Slime(Enemy):
+    """
+    전형적인 RPG 몹 슬라임 클래스입니다.
+    """
     def __init__(self, name: str):
         super().__init__(name=name, hp=150, power=30)
         self.job = "슬라임"
@@ -16,6 +19,9 @@ class Slime(Enemy):
         self.add_anim("Skill",   fps=10, loop=False, duration = 0.7)
 
     def basic_attack(self):
+        """
+        슬라임 기본공격 메서드
+        """
         target = self.select_target()
         if target is None:
             return
@@ -32,10 +38,8 @@ class Slime(Enemy):
 
     def skill(self):
         """
-    A 모드: 슬라임 스킬을 사용하면,
-    1) 슬라임 자신이 강한 공격을 먼저 하고
-    2) 이어서 살아있는 모든 슬라임이 순서대로 기본공격을 한다.
-    """
+        슬라임 스킬 메서드
+        """
 
     # 먼저 스킬 자체 공격
         target = self.select_target()

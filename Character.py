@@ -1,4 +1,3 @@
-
 import Field
 import Animation
 import  random
@@ -18,7 +17,7 @@ class Character:
         self.job = job
         self.job_eng = job_eng
         self.skill_name = skill_name
-        
+
         # 오른쪽을 주시하는지
         self.facing_right = True
 
@@ -53,14 +52,14 @@ class Character:
         self.hit_events = []
 
     # ---------------------------------------------------------
-    # 생존 여부
+    # 생존 여부 속성
     # ---------------------------------------------------------
     @property
     def is_alive(self):
         return self.current_hp > 0
 
     # ---------------------------------------------------------
-    # 애니메이션 추가
+    # 애니메이션 추가 메서드
     # ---------------------------------------------------------
     def add_anim(self, state, scale=2.5, fps=8, loop=True, duration = 0.5):
         """
@@ -74,12 +73,19 @@ class Character:
             self.current_anim = state
 
     # ---------------------------------------------------------
-    # 큐 조작
+    # 큐 조작 메서드들
     # ---------------------------------------------------------
     def queue_push(self, state, duration=None):
+        """
+        큐에 특정 상태 애니메이션 넣기
+        """
         self.anim_queue.append((state, duration))
 
     def queue_clear(self):
+        """
+        캐릭터 애니메이션 큐 전부 비우기
+        관련 변수도 모두 초기화
+        """
         self.anim_queue.clear()
         self.moving = False
         self.move_start = None
@@ -89,20 +95,25 @@ class Character:
         self.queue_time = 0.0
 
     # ---------------------------------------------------------
-    # 이동 명령 push
+    # 이동 명령 push하는 메서드
     # ---------------------------------------------------------
     def move_to(self, target_pos, duration=0.4):
         """
-        이동 명령을 큐에 추가.
-        duration 동안 선형보간으로 이동.
-        target_pos: (x, y)
+        이동 명령을 큐에 추가
+        duration 동안 선형이동
+        target_pos: (x, y) 튜플
         """
         self.anim_queue.append(("__move__", (target_pos, duration)))
 
     # ---------------------------------------------------------
-    # 큐 업데이트
+    # 큐 업데이트 메서드 !!매우중요!!
     # ---------------------------------------------------------
     def queue_update(self, dt):
+        """
+        게임 함수에서 매 프레임 호출
+        현재 캐릭터가 어떤 행동을 히야하는지 결정
+        이동 명령도 처리함
+        """
         # 큐가 비어 있음 → Idle 처리 후 종료
         if not self.anim_queue:
             if (
@@ -113,18 +124,19 @@ class Character:
                 idle_anim = self.animations["Idle"]
                 idle_anim.reset()
 
-                # 🔥 Idle duration 고정 초기화
+                # Idle duration 고정 초기화
                 idle_anim.duration = 0.5
                 idle_anim.time_per_frame = idle_anim.duration / idle_anim.total_frames
 
                 self.current_anim = "Idle"
 
-            return   # 🔥🔥🔥 여기 반드시 필요!
+            return  
+
+        state, data = self.anim_queue[0]
 
         # -------------------------
-        # 1) 이동 처리
+        # 현 상태가 "__move__" = 이동 명령일 때
         # -------------------------
-        state, data = self.anim_queue[0]
 
         if state == "__move__":
             target_pos, duration = data
@@ -133,7 +145,7 @@ class Character:
                 self.moving = True
                 self.move_start = self.position
                 self.move_target = target_pos
-                self.move_duration = max(duration, 1e-6)
+                self.move_duration = max(duration, 1e-6)  # duration이 0이되어 0으로 나누는 오류 방지!
                 self.move_elapsed = 0.0
 
                 # Walk 애니로 전환
@@ -185,9 +197,13 @@ class Character:
 
 
     # ---------------------------------------------------------
-    # update
+    # 캐릭터들의 애니메이션을 진행하는 등 매우중요한 함수 !!!!
     # ---------------------------------------------------------
     def update(self, dt):
+        """
+        캐릭터 애니메이션 진행
+        타격 이벤트 처리 담당 함수
+        """
         self.queue_update(dt)
         if self.current_anim:
             anim = self.animations.get(self.current_anim)
@@ -208,6 +224,7 @@ class Character:
                 if target is None or not target.is_alive:
                     # 대상이 죽었거나 None인 경우, 공격자(source)를 확인하여
                     # 적절한 반대편 리스트에서 재타겟팅을 시도한다.
+                    # 아처 스킬 사용시 발동된다. 거의 전용 코드
                     source = ev.get("source")
                     import Field as _F
 
@@ -240,27 +257,35 @@ class Character:
 
 
     # ---------------------------------------------------------
-    # draw
+    # 매 프레임당 해당 캐릭터의 애니메이션 재생하는 함수
     # ---------------------------------------------------------
     def draw(self, screen):
+        """
+        self.current_anim 변수에 들어간 애니메이션을 self.animations 리스트에서 찾아 
+        현 프레임에 맞는 프레임을 처리해서 self.position에 출력
+        """
         frame = self.animations[self.current_anim].frames[self.animations[self.current_anim].current_frame]
+        # facing_right 변수가 False = 왼쪽 보게 뒤집기
         if not self.facing_right:
             frame = pygame.transform.flip(frame, True, False)
         w, h = frame.get_size()
         screen.blit(frame, (self.position[0] - w//2, self.position[1] - h//2))
 
     # ---------------------------------------------------------
-    # 위치 지정
+    # 위치 지정 함수
     # ---------------------------------------------------------
     def set_position(self, x, y):
+        """
+        위치 지정
+        """
         self.position = (x, y)
 
     # ---------------------------------------------------------
-    # 타격 이벤트 예약
+    # 타격 이벤트 예약함수
     # ---------------------------------------------------------
     def hit_in(self, delay, target, damage, source=None):
         """
-        delay초 뒤에 target.take_damage(damage)를 실행하도록 예약
+        delay초 뒤에 특정 target에 take_damage(damage)를 실행하도록 예약
         """
         self.hit_events.append(
                 {
@@ -273,20 +298,36 @@ class Character:
 
     def hit_on_frame(self, anim_name, frame_index, target, damage):
         """
-        anim_name 애니메이션의 frame_index 프레임에서 타격이 일어나도록 예약.
-        SpriteAnimator.time_per_frame * frame_index 를 사용.
+        anim_name 애니메이션의 frame_index 프레임에서 특정 target에 타격이 일어나도록 예약
+        SpriteAnimator.time_per_frame * frame_index 를 사용
         """
         anim = self.animations[anim_name]
         delay = frame_index * anim.time_per_frame
         self.hit_in(delay, target, damage, source=self)
 
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # 여기서부턴 전투 관련 메서드!!!
+    # ------------------------------------------------------------------------------------------------------------------
+
     # ---------------------------------------------------------
-    # 전투 관련 (자식 클래스에서 오버라이드)
+    # 스킬 함수
     # ---------------------------------------------------------
     def skill(self):
+        """
+        캐릭터들 스킬 오버라이드용
+        오버라이드 안되면 에러
+        """
         raise NotImplementedError
 
+    # ---------------------------------------------------------
+    # 데미지를 입는 함수
+    # ---------------------------------------------------------
     def take_damage(self, damage):
+        """
+        damage 수치만큼을 self.current_hp에서 빼는 메서드
+        current.hp가 0이하가 되면 사망 애니메이션이 출력된다
+        """
         self.current_hp -= damage
         if self.current_hp <= 0:
             self.current_hp = 0
@@ -304,13 +345,20 @@ class Character:
         if "Hurt" in self.animations:
             self.queue_push("Hurt")
 
+        # 연속으로 공격을 받을 경우 = 현 애니메이션이 Hurt를 아직 출력중 -> 애니메이션 리셋해 다시 출력
         if self.current_anim == "Hurt":
             self.animations["Hurt"].reset()
 
-
-
-
+    # ---------------------------------------------------------
+    # 캐릭터의 체력을 회복하는 함수
+    # ---------------------------------------------------------
     def heal(self, amount):
+        """
+        amount 수치만큼 self.current_hp를 추가시킨다
+        max_hp 를 넘어갈 시 최대체력만큼 힐량 조정 
+        거의 Priest 전용 함수
+        """
+
         heal_amount = min(amount, self.max_hp - self.current_hp)
         self.current_hp += heal_amount
         print(
@@ -319,8 +367,15 @@ class Character:
         )
         if "Heal" in self.animations:
             self.queue_push("Heal", 0.5)
-
+    
+    # ---------------------------------------------------------
+    # 스킬 사용가능 여부 확인 함수
+    # ---------------------------------------------------------
     def can_use_skill(self):
+        """
+        각 캐릭터당 있는 skill_cost와 게임 내 스킬포인트 비교하는 bool형 함수
+        스킬을 사용못하면 False return
+        """
         return Field.skill_point >= self.skill_cost
 
     # ---------------------------------------------------------
@@ -336,6 +391,10 @@ class Character:
         move_back=True,
         is_enemy=False
     ):
+        """
+        캐릭터 기본공격 함수. is_enemy = 적일 경우, move_in, move_back = 근접캐릭일 때 True
+        hit_frame = 애니메이션 특정 프레임에서 타격 이벤트 발생
+        """
         if damage is None:
             damage = self.power
 
@@ -366,3 +425,5 @@ class Character:
         # 4) 복귀
         if move_back:
             self.move_to((ox, oy), duration=0.25)
+
+### 체감상 구현 난이도 압도적 1위

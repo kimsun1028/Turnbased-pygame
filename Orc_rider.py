@@ -3,6 +3,10 @@ from Enemy import Enemy
 
 
 class Orc_rider(Enemy):
+    """
+    전형적인 RPG내 보스 캐릭터입니다.
+    보스는 적 스킬 턴에 무조건 보스가 스킬을 사용합니다.
+    """
     def __init__(self, name="오크라이더", isBoss = False):
         super().__init__(name=name, hp=300, power=40)
         self.job = "오크라이더"
@@ -20,6 +24,9 @@ class Orc_rider(Enemy):
         self.add_anim("Death",  scale=3, fps=12, loop=False)
 
     def basic_attack(self):
+        """
+        기본 기본공격 메서드
+        """
         target = self.select_target()
         if target is None:
             return
@@ -36,8 +43,8 @@ class Orc_rider(Enemy):
 
     def skill(self):
         """
-        오크라이더 스킬: 애니메이션 큐를 이용한 완전 순차 연출
-        Dungeon.py 수정 없이 구현 가능!
+        오크라이더 스킬: 모든 아군에게 피해입히기
+        도발 중이면 메인타겟 : 나이트, 아닐시 중앙 아군
         """
         
         anim = "Basic"

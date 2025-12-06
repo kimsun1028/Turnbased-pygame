@@ -6,7 +6,9 @@ import Interface
 
 
 def _is_animating():
-    """아군/적 중 애니메이션 큐나 타격 이벤트가 남아 있으면 True"""
+    """
+    아군/적 중 애니메이션 큐나 타격 이벤트가 남아 있으면 True
+    """
     for c in Field.allies + Field.enemies:
         if getattr(c, "anim_queue", None):
             if c.anim_queue:
@@ -18,19 +20,26 @@ def _is_animating():
 
 
 def _draw_text_lines(screen, font, lines, x, y):
+    """
+    안내 텍스트 리스트(lines)를 화면(screen)의 (x, y) 위치에 줄 단위로 출력합니다.
+    """
     for i, line in enumerate(lines):
         surf = font.render(line, True, (255, 255, 255))
         screen.blit(surf, (x, y + i * 28))
 
 
 def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=False):
+    """
+    전투가 진행되는 단일 '층(floor)'의 메인 루프를 실행합니다.
+    """
     clock = pygame.time.Clock()
     running = True
 
-    # 🔥 오류 메시지 시스템
+    # 오류 메시지 관련 변수
     error_message = ""
     error_timer = 0
 
+    # 오류 메세지 출력 함수
     def show_error(msg):
         nonlocal error_message, error_timer
         error_message = msg
@@ -111,7 +120,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                 continue
 
             # ================================
-            # 패배 후: 다시 도전?
+            # 패배 후: 다시 도전 여부
             # ================================
             if state == "DEFEAT_QUERY":
                 if event.key == pygame.K_y:
@@ -149,7 +158,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                     show_error("옳지 않은 입력입니다!")
                 continue
 
-            # 다음 층으로 갈지
+            # 다음 층으로 갈지 확인
             if state == "NEXT_FLOOR_QUERY":
                 if event.key == pygame.K_y:
                     return "NEXT"
@@ -212,7 +221,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                         selected_targets = []
                         state = "PLAYER_SELECT_TARGET"
 
-                # 스킬
+                # 스킬 사용
                 elif event.key == pygame.K_2:
                     selected_action = "SKILL"
 
@@ -309,7 +318,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                     ch.anim_queue.clear()
 
         # ============================
-        # WAIT → 애니 끝나면 다음 단계
+        # 애니 끝나면 기다리는 단계
         # ============================
         if state == "WAIT_ANIMATION":
 
@@ -369,7 +378,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                 state = "ENEMY_WAIT"
 
         # ============================
-        # 적 WAIT → 애니 끝 → 다음 행동
+        # 적 행동 기다리는 단계
         # ============================
         if state == "ENEMY_WAIT":
 
@@ -491,7 +500,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
         if guide_lines:
             _draw_text_lines(screen, font, guide_lines, 30, 580)
 
-        # 🔥 오류 메시지 출력
+        # 오류 메시지 출력
         if error_message and pygame.time.get_ticks() < error_timer:
             err = font.render(error_message, True, (255, 80, 80))
             screen.blit(err, (30, 540))

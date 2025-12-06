@@ -4,6 +4,10 @@ from Effects import StaticEffect
 from Animation import SpriteAnimator
 
 class Priest(Character):
+    """
+    프리스트 클래스입니다. 판타지 RPG 직업에서 가장 전형적인 사제(힐러)를 구현하였습니다.
+    캐릭터.py의 자식 클래스로 기본공격과 스킬을 추가로 구현하였습니다.
+    """
     def __init__(self):
         super().__init__(
             power=30,
@@ -16,8 +20,14 @@ class Priest(Character):
 
         self.basic_desc = " | 지정한 적에게 피해를 입힙니다."
         self.skill_desc = "   | 지정한 아군에게 체력을 회복시키고 잃은 체력이 많은 아군을 회복시킵니다."
-
+    
+    # -----------------------------
+    # 기본 공격 메서드
+    # -----------------------------
     def basic_attack(self, target):
+        """
+        원거리 캐릭이기에 이펙트 생성
+        """
         Field.skill_point += 1
         # Priest 평타 애니메이션
         self.queue_clear()
@@ -38,8 +48,9 @@ class Priest(Character):
         )
 
  
-    
-            
+    # -----------------------------
+    # 스킬 메서드
+    # -----------------------------   
     def skill(self, idx):
         """
         스킬: 힐
@@ -80,7 +91,7 @@ class Priest(Character):
         patient = sorted(alive_allies,reverse = True, key = lambda x : x.max_hp - x.current_hp)[0]
         patient.heal(subheal_amount)
 
-        # 🔥 힐 이펙트 추가
+        # 힐 이펙트 추가
         heal_anim1 = SpriteAnimator(
             "animation/Priest/Priest-Heal_Effect.png",
             scale=2.0,

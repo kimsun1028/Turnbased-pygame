@@ -1,6 +1,10 @@
 from Enemy import Enemy
 
 class Orc(Enemy):
+    """
+    전형적인 RPG 내 몹 오크 클래스입니다.
+    슬라임의 구조와 매우 비슷합니다.
+    """
     def __init__(self, name: str):
         super().__init__(name=name, hp=150, power=30)
         self.job = "오크"
