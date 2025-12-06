@@ -8,7 +8,7 @@ from Character import Character
 class Archer(Character):
     def __init__(self):
         super().__init__(
-            power=4000,
+            power=40,
             max_hp=100,
             job="아처",
             job_eng="Archer",
@@ -49,7 +49,7 @@ class Archer(Character):
         Field.skill_point -= self.skill_cost
         print("아처가 '화살 난사'를 시전합니다!")
         total_hits = 10
-        damage_per_hit = int(self.power * 0.4)
+        damage_per_hit = int(self.power * 0.5)
         self.queue_clear()
         anim = "Skill"
         hit_start_frame = 12

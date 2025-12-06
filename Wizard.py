@@ -57,6 +57,8 @@ class Wizard(Character):
             for target in enemies_alive:
                 if target and target.is_alive:
                     self.hit_on_frame("Skill", hit_frame, target, damage)
+            if self.ult_remain == 0:
+                self.skill_desc = f" | 거대 얼음결정을 소환해 모든 적에게 강력한 피해를 입힙니다. (강화)"
         else:
             Field.effects.add(StaticEffect(ult_anim, (tx-400, ty-400), duration=1.0))
             for target in enemies_alive:

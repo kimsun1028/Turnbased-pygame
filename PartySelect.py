@@ -29,11 +29,14 @@ class PartySelect:
 
     def register_anims(self, character):
         character.add_anim("Idle",   fps=8,  loop=True)
-        character.add_anim("Walk",   fps=10, loop=True)
-        character.add_anim("Basic",  fps=10, loop=False)
-        character.add_anim("Hurt",   fps=12, loop=False)
-        character.add_anim("Death",  fps=12, loop=False)
-        character.add_anim("Skill", fps=12, loop=False)
+        character.add_anim("Walk",   fps=8, loop=True)
+        character.add_anim("Basic",  fps=8, loop=False)
+        character.add_anim("Hurt",   fps=8, loop=False)
+        character.add_anim("Death",  fps=8, loop=False)
+        if character.job == "아처":
+            character.add_anim("Skill", loop=False, duration = 1.5)
+        else:
+            character.add_anim("Skill", fps=12, loop = False)
         try:
             character.add_anim("TauntBasic", fps=12, loop=False)
         except:
@@ -120,13 +123,23 @@ class PartySelect:
                     if self.state == "SELECT":
                         if event.key == pygame.K_1:
                             self.current_pick = Knight
+                            self.state = "DETAIL"
+
                         elif event.key == pygame.K_2:
                             self.current_pick = Archer
+                            self.state = "DETAIL"
+
                         elif event.key == pygame.K_3:
                             self.current_pick = Wizard
+                            self.state = "DETAIL"
+
                         elif event.key == pygame.K_4:
                             self.current_pick = Priest
-                        self.state = "DETAIL"
+                            self.state = "DETAIL"
+
+                        else:
+                            self.error_message = "옳지 않은 입력입니다! (1~4 선택)"
+                            self.error_timer = pygame.time.get_ticks() + 1000
 
 
             # ============================================
@@ -157,6 +170,8 @@ class PartySelect:
             elif self.state == "DETAIL":
                 # 상세 설명 레이아웃
                 long_desc = self.get_long_desc(self.current_pick)
+                if self.current_pick != Archer:
+                    self.draw_text("기본 공격 : 스킬포인트 획득",30,60)
                 base_x = 30
                 base_y = 550
                 y = base_y
@@ -164,6 +179,7 @@ class PartySelect:
                     self.draw_text(line, base_x, y)
                     y += 28
                 self.draw_text("[ENTER] 선택  |  [ESC] 뒤로가기",30,30)
+                
                 for c in self.preview_chars:
                     c.draw(self.screen)
             # ============================
@@ -194,15 +210,15 @@ class PartySelect:
             return [
                 "2. 아처",
                 "기본 공격:   지정한 두 명의 적에게 연속 사격으로 POWER 100% 만큼의 피해를 입힙니다.",
-                "스킬:          무작위 적에게 POWER 40%의 화살을 10발 난사하여 피해를 입힙니다.",
+                "스킬:          무작위 적에게 POWER 50%의 화살을 10발 난사하여 피해를 입힙니다.",
                 "기본 공격이 스킬포인트를 회복하지 않습니다."
             ]
         elif cls == Wizard:
             return [
                 "3. 위자드",
                 "기본 공격:   지정한 적에게 파이어볼로 POWER 100% 만큼의 피해를 입힙니다.",
-                "스킬:          얼음 결정을 소환하여 모든 적에게 POWER 100%의 피해를 입힙니다.",
-                "스킬 사용 횟수에 따라 스킬의 피해가 20씩 증가합니다."
+                "스킬:          얼음 결정을 소환하여 모든 적에게 POWER 75%의 피해를 입힙니다.",
+                "3번째 스킬마다 더욱 강력한 얼음결정을 소환하여 두배의 피해를 입힙니다."
             ]
 
         elif cls == Priest:

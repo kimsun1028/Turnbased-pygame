@@ -27,6 +27,15 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
     clock = pygame.time.Clock()
     running = True
 
+    # 🔥 오류 메시지 시스템
+    error_message = ""
+    error_timer = 0
+
+    def show_error(msg):
+        nonlocal error_message, error_timer
+        error_message = msg
+        error_timer = pygame.time.get_ticks() + 1000  # 1초 표시
+
     bg_image = pygame.image.load(bg_path).convert()
     bg_image = pygame.transform.scale(bg_image, (1280, 720))
 
@@ -68,6 +77,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
     selected_char = None
     selected_action = None
     selected_targets = []
+
     for ally in Field.allies_alive():
         ally.current_hp = ally.max_hp
 
@@ -79,7 +89,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
     while running:
         dt = clock.tick(60) / 1000.0
 
-        # 아군 전멸 → 패배 상태 진입 (질문 상태로만 전환)
+        # 아군 전멸 → 패배 상태 진입
         if not Field.allies_alive() and state not in (
             "DEFEAT_QUERY",
             "QUIT_QUERY",
@@ -100,63 +110,74 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
             if event.type != pygame.KEYDOWN:
                 continue
 
-            # ----------------------------
+            # ================================
             # 패배 후: 다시 도전?
-            # ----------------------------
+            # ================================
             if state == "DEFEAT_QUERY":
                 if event.key == pygame.K_y:
                     return "RETRY"
                 elif event.key == pygame.K_n:
                     state = "QUIT_QUERY"
+                else:
+                    show_error("옳지 않은 입력입니다!")
                 continue
 
-            # ----------------------------
-            # 패배 후: 게임 종료?
-            # ----------------------------
             if state == "QUIT_QUERY":
                 if event.key == pygame.K_y:
                     return "QUIT"
                 elif event.key == pygame.K_n:
                     return "RESELECT"
+                else:
+                    show_error("옳지 않은 입력입니다!")
                 continue
 
-            # ----------------------------
-            # 모든 층 클리어 후: 다시 시작?
-            # ----------------------------
             if state == "ENDGAME_QUERY":
                 if event.key == pygame.K_y:
-                    return "RESELECT"   # 파티 선택부터 다시 시작
+                    return "RESELECT"
                 elif event.key == pygame.K_n:
                     state = "ENDGAME_QUIT_QUERY"
+                else:
+                    show_error("옳지 않은 입력입니다!")
                 continue
 
-            # ----------------------------
-            # 엔딩 후: 게임 종료?
-            # ----------------------------
             if state == "ENDGAME_QUIT_QUERY":
                 if event.key == pygame.K_y:
                     return "QUIT"
                 elif event.key == pygame.K_n:
                     state = "ENDGAME_QUERY"
+                else:
+                    show_error("옳지 않은 입력입니다!")
                 continue
 
-            # ----------------------------
-            # (마지막 층이 아니라) 다음 층으로?
-            # ----------------------------
+            # 다음 층으로 갈지
             if state == "NEXT_FLOOR_QUERY":
                 if event.key == pygame.K_y:
                     return "NEXT"
                 elif event.key == pygame.K_n:
-                    return "QUIT"
+                    state = "NEXT_FLOOR_OPTION"
+                continue
+
+            if state == "NEXT_FLOOR_OPTION":
+                if event.key == pygame.K_1:
+                    return "RESELECT"   # 파티 다시 선택하기 (1층으로 돌아감)
+
+                elif event.key == pygame.K_2:
+                    return "NEXT"       # 다음 층으로 이동
+
+                elif event.key == pygame.K_3:
+                    return "QUIT"       # 게임 종료하기
+
+                else:
+                    show_error("옳지 않은 입력입니다! (1~3 선택)")
                 continue
 
             # ============================
-            # 아군 선택
+            # 아군 선택 단계
             # ============================
             if state == "PLAYER_SELECT_ACTOR":
 
                 if event.key in (pygame.K_1, pygame.K_2, pygame.K_3):
-                    key_idx = event.key - pygame.K_1 + 1  # 1~3 고정 번호
+                    key_idx = event.key - pygame.K_1 + 1
 
                     for ch in Field.allies:
                         if ch.fixed_index == key_idx and ch.is_alive:
@@ -165,13 +186,16 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                             selected_action = None
                             state = "PLAYER_SELECT_ACTION"
                             break
+                else:
+                    show_error("옳지 않은 입력입니다! (1~3 선택)")
+                    continue
 
             # ============================
             # 행동 선택
             # ============================
             elif state == "PLAYER_SELECT_ACTION" and selected_char is not None:
 
-                # ① 기본 공격
+                # 기본 공격
                 if event.key == pygame.K_1:
                     selected_action = "BASIC"
                     enemies_alive = Field.enemies_alive()
@@ -188,12 +212,12 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                         selected_targets = []
                         state = "PLAYER_SELECT_TARGET"
 
-                # ② 스킬
+                # 스킬
                 elif event.key == pygame.K_2:
                     selected_action = "SKILL"
 
                     if not selected_char.can_use_skill():
-                        print("스킬 포인트 부족!")
+                        show_error("스킬 포인트가 부족합니다!")
                         continue
 
                     if selected_char.job == "아처":
@@ -210,12 +234,15 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                         action_left -= 1
                         state = "WAIT_ANIMATION"
 
-                # ③ 취소
+                # 취소
                 elif event.key == pygame.K_3:
                     selected_char = None
                     selected_action = None
                     selected_targets = []
                     state = "PLAYER_SELECT_ACTOR"
+
+                else:
+                    show_error("옳지 않은 입력입니다! (1~3 선택)")
 
             # ============================
             # 대상 선택
@@ -224,47 +251,46 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
 
                 if event.key in (pygame.K_1, pygame.K_2, pygame.K_3):
                     key_idx = event.key - pygame.K_1 + 1
+                else:
+                    show_error("옳지 않은 입력입니다! (1~3 선택)")
+                    continue
 
-                    # 기본 공격
-                    if selected_action == "BASIC":
+                # 기본 공격 대상 선택
+                if selected_action == "BASIC":
 
-                        # 아처: 2명 필요
-                        if selected_char.job == "아처":
-                            for enemy in Field.enemies:
-                                if enemy.fixed_index == key_idx and enemy.is_alive:
-                                    selected_targets.append(enemy)
+                    # 아처: 대상 2명 필요
+                    if selected_char.job == "아처":
+                        for enemy in Field.enemies:
+                            if enemy.fixed_index == key_idx and enemy.is_alive:
+                                selected_targets.append(enemy)
 
-                                    if len(selected_targets) == 2:
-                                        selected_char.basic_attack(
-                                            selected_targets[0],
-                                            selected_targets[1],
-                                        )
-                                        action_left -= 1
-                                        state = "WAIT_ANIMATION"
-                                    break
-
-                        else:  # 나이트, 프리스트 1명만
-                            for enemy in Field.enemies:
-                                if enemy.fixed_index == key_idx and enemy.is_alive:
-                                    selected_char.basic_attack(enemy)
+                                if len(selected_targets) == 2:
+                                    selected_char.basic_attack(
+                                        selected_targets[0],
+                                        selected_targets[1],
+                                    )
                                     action_left -= 1
                                     state = "WAIT_ANIMATION"
-                                    break
+                                break
 
-                    # 프리스트 힐
-                    elif (
-                        selected_action == "SKILL"
-                        and selected_char.job == "프리스트"
-                    ):
-
-                        for ally in Field.allies:
-                            if ally.fixed_index == key_idx and ally.is_alive:
-                                alive_list = Field.allies_alive()
-                                heal_idx = alive_list.index(ally)
-                                selected_char.skill(heal_idx)
+                    else:
+                        for enemy in Field.enemies:
+                            if enemy.fixed_index == key_idx and enemy.is_alive:
+                                selected_char.basic_attack(enemy)
                                 action_left -= 1
                                 state = "WAIT_ANIMATION"
                                 break
+
+                # 프리스트 힐
+                elif selected_action == "SKILL" and selected_char.job == "프리스트":
+                    for ally in Field.allies:
+                        if ally.fixed_index == key_idx and ally.is_alive:
+                            alive_list = Field.allies_alive()
+                            heal_idx = alive_list.index(ally)
+                            selected_char.skill(heal_idx)
+                            action_left -= 1
+                            state = "WAIT_ANIMATION"
+                            break
 
         # =====================================================
         # 업데이트
@@ -283,25 +309,21 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
                     ch.anim_queue.clear()
 
         # ============================
-        # WAIT 상태 → 애니 끝나면 다음 단계
+        # WAIT → 애니 끝나면 다음 단계
         # ============================
         if state == "WAIT_ANIMATION":
 
-            # 적 전멸
             if not Field.enemies_alive():
 
                 if last_floor:
-                    # 마지막 층 클리어 → 엔딩 질문 상태로
                     state = "ENDGAME_QUERY"
                 else:
-                    # 다음 층 여부 질문
                     state = "NEXT_FLOOR_QUERY"
 
                 continue
 
             if not _is_animating():
 
-                # 애니 끝났는데 아군이 없음 → 패배 상태
                 if not Field.allies_alive():
                     state = "DEFEAT_QUERY"
                     continue
@@ -341,7 +363,7 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
 
             elif enemy_action_step == 1:
                 for enemy in enemies_alive:
-                    if enemy.isBoss == True:
+                    if enemy.isBoss:
                         attacker = enemy
                 attacker.skill()
                 state = "ENEMY_WAIT"
@@ -418,17 +440,11 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
             guide_lines.append(f"선택된 아군: {selected_char.job}")
 
             if selected_char.job == "나이트" and Field.is_taunt():
-                guide_lines.append(
-                    f"1: 기본 공격(강화){selected_char.sbasic_desc}"
-                )
+                guide_lines.append(f"1: 기본 공격(강화){selected_char.sbasic_desc}")
             else:
-                guide_lines.append(
-                    f"1: 기본 공격{selected_char.basic_desc}"
-                )
+                guide_lines.append(f"1: 기본 공격{selected_char.basic_desc}")
 
-            guide_lines.append(
-                f"2: {selected_char.skill_name}(스킬){selected_char.skill_desc}"
-            )
+            guide_lines.append(f"2: {selected_char.skill_name}(스킬){selected_char.skill_desc}")
             guide_lines.append("3: 취소")
 
         elif state == "PLAYER_SELECT_TARGET" and selected_char is not None:
@@ -465,11 +481,23 @@ def floor(screen, bg_path, start_pos=(350, 300), gap=100, gap2=600, last_floor=F
 
         elif state == "ENEMY_TURN":
             guide_lines.append("[적 턴 진행 중]")
+        elif state == "NEXT_FLOOR_OPTION":
+            guide_lines.append("다음 행동을 선택하세요:")
+            guide_lines.append("1. 파티 다시 선택하기")
+            guide_lines.append("2. 다음 층으로 이동하기")
+            guide_lines.append("3. 게임 종료하기")
+
 
         if guide_lines:
             _draw_text_lines(screen, font, guide_lines, 30, 580)
 
+        # 🔥 오류 메시지 출력
+        if error_message and pygame.time.get_ticks() < error_timer:
+            err = font.render(error_message, True, (255, 80, 80))
+            screen.blit(err, (30, 540))
+        elif pygame.time.get_ticks() >= error_timer:
+            error_message = ""
+
         pygame.display.flip()
 
     return "QUIT"
-

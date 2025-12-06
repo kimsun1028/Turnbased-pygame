@@ -24,6 +24,8 @@ def walk_to_next_floor(screen, bg_image):
 
     # 아군 걷기 모션
     for ally in Field.allies:
+        if not ally.is_alive:
+            continue
         ally.anim_queue.clear()
         ally.hit_events.clear()
         ally.current_anim = "Walk"
@@ -38,11 +40,13 @@ def walk_to_next_floor(screen, bg_image):
         # 캐릭터 이동
         # ---------------------------
         for ally in Field.allies:
+            if not ally.is_alive:
+                continue
             x, y = ally.position
             ally.set_position(x + 400 * dt, y)
             ally.update(dt)
 
-            if ally.position[0] < 2500:
+            if ally.position[0] < 2000:
                 finished = False
 
         # ---------------------------
