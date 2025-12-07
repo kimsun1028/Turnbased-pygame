@@ -126,3 +126,5 @@ pip install pygame
 
 ### 승리 
 ![Victory](image/screenshot/screenshot.victory.png)
+
+---
