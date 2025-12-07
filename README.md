@@ -183,4 +183,9 @@ https://www.artstation.com/artwork/2g1DA
 
 ---
 
+## License
+This project is released under the MIT License.
+
+---
+
  재밋었습니다
