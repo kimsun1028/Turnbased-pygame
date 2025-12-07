@@ -4,8 +4,7 @@ import Field
 from Slime import Slime
 from Orc_rider import Orc_rider
 from Orc import Orc
-import Dungeon  # ← Dungeon.py 임포트
-
+import Dungeon  
 
 def setup_first_floor():
     """

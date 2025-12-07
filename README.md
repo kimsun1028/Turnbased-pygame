@@ -109,6 +109,20 @@ pip install pygame
 
 ---
 
+## 플레이 스크린샷
+
+### 파티 선택 장면
+![PartySelect](image/screenshot/screenshot.party_select.png)
 
 
+### 1층 전투 장면
+![FirstFloor](image/screenshot/screenshot.first_floor.png)
 
+### 1층 종료
+![NextFloor?](image/screenshot/screenshot.next_floor.png)
+
+### 2층 전투 장면
+![SecondFloor](image/screenshot/screenshot.second_floor.png)
+
+### 승리 
+![Victory](image/screenshot/screenshot.victory.png)
