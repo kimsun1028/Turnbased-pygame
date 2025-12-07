@@ -128,3 +128,54 @@ pip install pygame
 ![Victory](image/screenshot/screenshot.victory.png)
 
 ---
+
+## 🛠 추후 개발 예정 기능 (Planned Features)
+
+아래 기능들은 향후 업데이트 계획이며, 현재 버전에는 포함되지 않았습니다.
+
+### ✔ 히든스킬(Hidden Skill) 시스템  
+- 각 캐릭터마다 조건 달성 시 고유 스킬 발동 (예 : 프리스트 제외 모든 아군 사망시 프리스트를 희생하여 모든 아군 부활 등) 
+- 전투 템포를 바꾸는 강력한 스킬 추가 예정
+
+### ✔ 더 많은 스테이지 및 던전  
+- 3층 이상 던전 추가  
+- 중간보스 / 최종보스 단계 확장
+
+### ✔ 아이템 및 버프 시스템  
+- 포션, 버프 스크롤 등 소모품 아이템 추가  
+- 전투 전략성 강화
+
+### ✔ 사용자 UI 개선  
+- HP 바 디자인 개선  
+- 행동 선택 UI를 더 직관적으로 정리  
+- 전투 로그 출력
+
+---
+
+## 📚 참고 자료 (References)
+
+이 프로젝트에서 참고하거나 사용한 리소스 및 자료입니다.
+
+### ✔ 오픈소스 / 문서  
+- Pygame 공식 문서  
+  https://www.pygame.org/docs/
+- Python 공식 문서  
+  https://docs.python.org/3/
+
+### ✔ 스프라이트 및 이미지 리소스  
+- Slime, Orc, Orc Rider, Knight 등 스프라이트  
+https://zerie.itch.io/tiny-rpg-character-asset-pack
+
+- 배경 이미지  
+https://www.gameassetdeals.com/asset/156486/battle-backgrounds
+https://www.artstation.com/artwork/2g1DA
+
+### ✔ 참고 게임
+ - 다키스트 던전 
+ https://store.steampowered.com/app/262060/Darkest_Dungeon/?l=koreana
+
+ - 세븐 나이츠
+ https://sena.netmarble.com/ko
+
+ - 붕괴: 스타레일
+ https://hsr.hoyoverse.com/
